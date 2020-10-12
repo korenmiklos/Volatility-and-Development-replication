@@ -1,15 +1,4 @@
-capture log close
-log using "factors as cross-section means oct 28", replace text
-
-
-* prelims
-clear
-set mem 128m
-* we don't need this yet
-* set matsize 3000
-set more off
-
-use shares_long30, clear
+use "data/derived/shares.dta", clear
 
 su sector
 global S = r(max)
@@ -48,33 +37,34 @@ forval s = 1/$S {
 	}
 }
 
-save factors_temp30, replace
+tempfile factors indfactors 
+save `factors', replace
 
 * save country correspondence
 collapse (count) epsilon, by(cnum country)
 drop epsilon
 sort cnum
-save countries30, replace
+save "data/derived/countries.dta", replace
 
-use factors_temp30, clear
+use `factors', clear
 
 collapse (mean) indf, by(sector year)
 ren indf Fs
 reshape wide Fs, i(year) j(sector)
 
 sort year
-save indfactors_wide30, replace
+save `indfactors', replace
 
 
 * do the same for cnt factors
-use factors_temp30
+use `factors'
 
 collapse (mean) cntf, by(country year)
 ren cntf Fc
 reshape wide Fc, i(year) j(country)
 
 sort year
-merge year using indfactors_wide30
+merge year using `indfactors'
 tab _
 drop _
 
@@ -82,12 +72,9 @@ drop _
 egen Jt = robs(Fc*)
 
 sort year
-save allfactors_wide30, replace 
+save "data/derived/allfactors.dta", replace 
 
 keep year Jt
 sort year
-save Jt, replace
-
-log close
-set more on
+save "data/derived/Jt.dta", replace
 
