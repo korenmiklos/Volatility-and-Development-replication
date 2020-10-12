@@ -1,21 +1,15 @@
-capture log close
-*log using "mean returns oct 17", replace text
-
-global DIR .
-
-* prelims
 clear
-set mem 128m
-set matsize 800
-set more off
-use c:/P1-Div/wdiilo.dta, clear
+use "data/wdi/wdiilo.dta", clear
 drop share
 destring, replace
 sort ccode year 
-save c:/P1-Div/temp.dta, replace
-use c:/P1-Div/wdinew.dta
+
+tempfile wdiilo
+save `wdiilo', replace
+
+use "data/wdi/wdinew.dta"
 sort ccode year
-merge ccode year using temp.dta
+merge ccode year using `wdiilo'
 tab _
 drop if ccode==""
 drop if cnum==.
@@ -98,36 +92,35 @@ gen shock = Dshock-mind-mcnt+moverall
 egen sumshare = sum(share), by(country year)
 replace share = share/sumshare
 
-save shares_long30, replace 
+save "data/derived/shares.dta", replace 
 
 * go for the means
 collapse (mean) laborprod = laborprod0, by(cnum country isic sector)
 su laborprod, d
 
-
 sort cnum isic
-save meanlaborprod_long30, replace
+save "data/derived/meanlaborprod_long.dta", replace
 
 keep sector country laborprod
 reshape wide laborprod, i(country) j(sector)
 
 sort country
-save meanlaborprod_wide30, replace
+save "data/derived/meanlaborprod_wide.dta", replace
 
 
 * now do the WIDE stuff
-use shares_long30, clear
+use "data/derived/shares.dta", clear
 
 keep share country year sector cnum
 reshape wide share, i(country cnum year) j(sector)
 
 sort cnum year
-save preparedshares30, replace
+save "data/derived/preparedshares.dta", replace
 
 ********************************************
 * will need to create the sample second moment matrix here
 
-use shares_long30, clear
+use "data/derived/shares.dta", clear
 * this is a unique identifier w/ last 2 digits = sector
 gen cntsec = country*100+sector
 keep cntsec year shock
@@ -135,9 +128,3 @@ reshape wide shock, i(year) j(cntsec)
 * this is very wide, may need more memory 
 
 
-set more on
-
-************
-/*gen temp=cpi if country==840
-egen cpiUSA=mean(temp), by(year)
-*/
