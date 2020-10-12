@@ -16,7 +16,6 @@ World Development Indicators (World Bank 2003) is available with a [Creative Com
 
 ## Dataset list
 
-|--|--|--|--|
 Data file | Source | Notes | Provided
 |--|--|--|--|
 | `data/unido/*.dta` | UNIDO (2002) | Converted to Stata format | Yes
@@ -71,7 +70,7 @@ do createallgraphs.do
 | Figure III (bottom right) | `createallgraphs.do`  |  28 | `within_Average_Variance_loggdp.eps` ||
 
 ## References
-* Koren, Miklós, and Silvana Tenreyro, 2007. “Volatility and Development.” Quarterly Journal of Economics. 122(1), pp. 243-287.
+* Koren, Miklós, and Silvana Tenreyro, 2007. “Volatility and Development.” Quarterly Journal of Economics. 122(1), pp. 243-287. https://zenodo.org/record/1441497
 * UNIDO, 2002. INDSTAT 2 Industrial Statistics Database at 2-digit level of ISIC Revision 3 [dataset]. Vienna. Available from http://stat.unido.org.
-* World Bank, 2003. World Development Indicators [dataset]. Downloaded 2003-07-14
-* Heston, A., R. Summers, and B. Aten, 2002. Penn World Table Version 6.1 [dataset], Center for International Comparisons at the University of Pennsylvania (CICUP).
+* World Bank, 2003. World Development Indicators [dataset]. Downloaded 2003-07-14. http://datatopics.worldbank.org/world-development-indicators/
+* Heston, A., R. Summers, and B. Aten, 2002. Penn World Table Version 6.1 [dataset], Center for International Comparisons at the University of Pennsylvania (CICUP). https://www.rug.nl/ggdc/productivity/pwt/pwt-releases/pwt-6.1
