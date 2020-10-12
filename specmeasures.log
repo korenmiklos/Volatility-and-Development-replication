@@ -3997,24 +3997,19 @@ r47  16.920893
 
 . egen HERF=rsum(sqFs1 - sqFs$S)
 
-. replace HERF=HERF*sigma2
-(1,507 real changes made)
-
 . su HERF
 
     Variable |        Obs        Mean    Std. Dev.       Min        Max
 -------------+---------------------------------------------------------
-        HERF |      1,507    .0079132    .0035759   .0050257    .035696
+        HERF |      1,507    .1241311    .0560934   .0788353   .5599452
 
 . 
-. * del Negro's HERF is dnHERF
-. * this is a weighted sum of squares
-. gen dnHERF=0
+. gen IDIO = 0
 
 . forval s = 1/$S {
   2.         forval j = 1/$J {
-  3.                 replace dnHERF = dnHERF+sqFs`s'*dnsigma2[`s',`j'] if count
-> ry==`j'
+  3.                 replace IDIO = IDIO + sqFs`s'*dnsigma2[`s',`j'] if country
+> ==`j'
   4.         }
   5. }
 (30 real changes made)
@@ -4919,26 +4914,18 @@ r47  16.920893
 
 . forval X = 1/$J {
   2.     di in gre "Country # " in ye `X'
-  3. ********* have to change omega here if we want to use dnHERF
-. * this is the old one, just in case
-. *    matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1
-> ,1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(
-> Varcnt,"Fc`X'")]*J($S,$S,1)+sigma2*I($S)
-. * and here comes the new one
-.     matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1,
-> 1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(V
-> arcnt,"Fc`X'")]*J($S,$S,1)+diag(dnsigma2[1..$S,`X'])
+  3.     matrix Omega = Varind + Covindcnt["Fc`X'","Fs1".."Fs$S"]' * J(1,$S,1) 
+> + J($S,1,1) * Covindcnt["Fc`X'","Fs1".."Fs$S"] + Varcnt[rownumb(Varcnt,"Fc`X'
+> "),colnumb(Varcnt,"Fc`X'")] * J($S,$S,1) + diag(dnsigma2[1..$S,`X'])
   4.     matrix mu = Mu[`X',1..$S]
   5. 
-. 
-. 
 . * this calcs current mean return using labor shares
 .     capture drop mtemp
   6.     matrix score mtemp = mu
   7.     replace m=mtemp if country==`X'
   8. 
-.     matrix A = (mu*inv(Omega)*mu', J(1,$S,1)*inv(Omega)*mu' \ J(1,$S,1)*inv(O
-> mega)*mu' , J(1,$S,1)*inv(Omega)*J($S,1,1))
+.     matrix A = (mu*inv(Omega)*mu', J(1,$S,1) * inv(Omega) * mu' \ J(1,$S,1) *
+>  inv(Omega)*mu' , J(1,$S,1) * inv(Omega) * J($S,1,1))
   9.     matrix core = inv(A) 
  10. * the previous formula was the same but longer
 .     replace b0 = core[2,2] if country==`X'
@@ -5288,9 +5275,7 @@ Country # 47
 
 . * this is the lowest risk for the given mean
 . 
-. gen RISK = SECT+HERF+2*BETA*TAU2+TAU2
-
-. gen dnRISK = SECT+dnHERF+2*BETA*TAU2+TAU2
+. gen RISK = SECT + IDIO + 2*BETA*TAU2 + TAU2
 
 . * this is the overall 
 . 
@@ -5316,9 +5301,9 @@ Country # 47
 . tempfile sm
 
 . save `sm', replace 
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01729.000001 no
+(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02048.000001 no
 > t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01729.000001 saved
+file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02048.000001 saved
 
 . 
 . 

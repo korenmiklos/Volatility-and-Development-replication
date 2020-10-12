@@ -3708,9 +3708,9 @@ end of do-file
 . tempfile factors indfactors 
 
 . save `factors', replace
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01727.000001 no
+(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02046.000001 no
 > t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01727.000001 saved
+file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02046.000001 saved
 
 . 
 . * save country correspondence
@@ -3747,9 +3747,9 @@ xij variables:
 . sort year
 
 . save `indfactors', replace
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01727.000002 no
+(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02046.000002 no
 > t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01727.000002 saved
+file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02046.000002 saved
 
 . 
 . 

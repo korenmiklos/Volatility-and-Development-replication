@@ -62,15 +62,12 @@ forval Y=1/$S {
 egen SECT=rsum(SigmaFs1 - SigmaFs$S)
 su SECT
 egen HERF=rsum(sqFs1 - sqFs$S)
-replace HERF=HERF*sigma2
 su HERF
 
-* del Negro's HERF is dnHERF
-* this is a weighted sum of squares
-gen dnHERF=0
+gen IDIO = 0
 forval s = 1/$S {
 	forval j = 1/$J {
-		replace dnHERF = dnHERF+sqFs`s'*dnsigma2[`s',`j'] if country==`j'
+		replace IDIO = IDIO + sqFs`s'*dnsigma2[`s',`j'] if country==`j'
 	}
 }
 
@@ -79,21 +76,15 @@ matrix residual=J($S,1,0)
 matrix residual = dnsigma2 * J($J,1,1/$J)
 forval X = 1/$J {
     di in gre "Country # " in ye `X'
-********* have to change omega here if we want to use dnHERF
-* this is the old one, just in case
-*    matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1,1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(Varcnt,"Fc`X'")]*J($S,$S,1)+sigma2*I($S)
-* and here comes the new one
-    matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1,1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(Varcnt,"Fc`X'")]*J($S,$S,1)+diag(dnsigma2[1..$S,`X'])
+    matrix Omega = Varind + Covindcnt["Fc`X'","Fs1".."Fs$S"]' * J(1,$S,1) + J($S,1,1) * Covindcnt["Fc`X'","Fs1".."Fs$S"] + Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(Varcnt,"Fc`X'")] * J($S,$S,1) + diag(dnsigma2[1..$S,`X'])
     matrix mu = Mu[`X',1..$S]
-
-
 
 * this calcs current mean return using labor shares
     capture drop mtemp
     matrix score mtemp = mu
     replace m=mtemp if country==`X'
 
-    matrix A = (mu*inv(Omega)*mu', J(1,$S,1)*inv(Omega)*mu' \ J(1,$S,1)*inv(Omega)*mu' , J(1,$S,1)*inv(Omega)*J($S,1,1))
+    matrix A = (mu*inv(Omega)*mu', J(1,$S,1) * inv(Omega) * mu' \ J(1,$S,1) * inv(Omega)*mu' , J(1,$S,1) * inv(Omega) * J($S,1,1))
     matrix core = inv(A) 
 * the previous formula was the same but longer
     replace b0 = core[2,2] if country==`X'
@@ -111,8 +102,7 @@ forval X = 1/$J {
 gen V = b0+b1*m+b2*m^2
 * this is the lowest risk for the given mean
 
-gen RISK = SECT+HERF+2*BETA*TAU2+TAU2
-gen dnRISK = SECT+dnHERF+2*BETA*TAU2+TAU2
+gen RISK = SECT + IDIO + 2*BETA*TAU2 + TAU2
 * this is the overall 
 
 gen COV2 = 2*BETA*TAU2
