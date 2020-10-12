@@ -20,11 +20,8 @@ Notes:
       3.  More than 2 billion observations are allowed; see help obs_advice.
       4.  Maximum number of variables is set to 5000; see help set_maxvar.
 
-. do preparefactors.do 
+. do specmeasures.do 
 
-. use "data/derived/shares.dta", clear
-
-. 
 . do "set_globals.do"
 
 . preserve
@@ -831,131 +828,893 @@ Notes:
 end of do-file
 
 . 
-. * calc global factor 
-. * though we put it in ind factors and not use it separately
-. egen glbf = mean(shock), by(year)
-(612 missing values generated)
+. use "data/derived/allfactors.dta", clear
 
 . 
-. * calculate the sectoral means as fixed effect estimates of the industry fact
-> ors
-. egen indf = mean(shock), by(sector year)
-(612 missing values generated)
+. * estimate pairwise covariances 
+. matrix S = J($S+$J,$S+$J,0)
+
+. matname S Fc1-Fc$J Fs1 Fs2-Fs$S, rows(.)
+
+. matname S Fc1-Fc$J Fs1 Fs2-Fs$S, col(.)
 
 . 
-. * calculate country means, this has measurement error!
-. egen cntf = mean(shock-indf), by(country year)
-(933 missing values generated)
+. foreach X of varlist Fc1-Fc$J Fs1 Fs2-Fs$S {
+  2.     foreach Y of varlist Fc1-Fc$J Fs1 Fs2-Fs$S {
+  3.         capture matrix accum Spair = `X' `Y', nocons
+  4.         capture matrix S[rownumb(S,"`X'"),colnumb(S,"`Y'")] = Spair[2,1]/r
+> (N)
+  5.     }
+  6. }
 
 . 
-. * calculate even more residuals
-. gen epsilon = shock - indf - cntf
-(940 missing values generated)
+. 
+. matrix Varcnt = S["Fc1".."Fc$J","Fc1".."Fc$J"]
+
+. matrix Varind = S["Fs1".."Fs$S","Fs1".."Fs$S"]
+
+. matrix Covindcnt = S["Fc1".."Fc$J","Fs1".."Fs$S"]
 
 . 
-. tempfile factors indfactors 
+. 
+. 
+. 
+. * read in mean returns
+. use "data/derived/meanlaborprod_wide.dta", clear
 
-. save `factors', replace
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01541.000001 no
+. 
+. sort country
+
+. 
+. * rename vars to be compatible with shares
+. foreach X of num 1/$S {
+  2.     ren laborprod`X' Fs`X'
+  3. }
+
+. 
+. mkmat Fs1-Fs$S, mat(Mu)
+
+. mat list Mu
+
+Mu[60,3]
+           Fs1        Fs2        Fs3
+ r1  73.961159  156.54813  91.489502
+ r2  211.80698  318.02194  248.23065
+ r3  13.547022  30.588539  35.073162
+ r4  565.55475  966.36023  433.37704
+ r5  142.20393  132.69464  147.08136
+ r6  10.009276  13.815854  12.420688
+ r7  107.45264  15.770095    9.87885
+ r8  1.595e+11  8.230e+11  4.367e+11
+ r9  13699.782  26683.182  17408.119
+r10  215.28398  418.49701  276.66235
+r11  .84463066  1.8214611  2.1805472
+r12  .39016783  1.4344766  .78670734
+r13  2.0220714  11.151366   13.32007
+r14  14.023803  1.1518329  .73393732
+r15  3.3942058  5.7399292  4.0958972
+r16  257.34741  492.22977  645.84497
+r17  43.810593  52.473862  56.402725
+r18  .09556653  .06069123  .03409643
+r19  57.231953  22.299238  22.421694
+r20  40.719246  75.825211  64.740234
+r21   90.88401  65.648193  66.447273
+r22  1.2496938  2.8781531  3.4791911
+r23   58.01329  22.363905  25.641483
+r24  19.757095   37.75021  69.821861
+r25  15.367484  15.525837  15.873207
+r26  .00775648  .05847027  .02368496
+r27  345.85336  694.94531  519.41595
+r28  .13329132  .29607239  .32241172
+r29  1.1260259  3.6478736  3.4480832
+r30  .11203103  .14781895   .1172289
+r31  4575.6655  4583.8145  2728.6309
+r32  8.1245632  14.803655  16.289749
+r33   28.25765  65.245514  40.664921
+r34  235.75716   1103.856  1583.0933
+r35  .35348529  .73560584  2.3174257
+r36  171.60379  222.47281  175.41631
+r37  200.28151   285.1987  264.23828
+r38  69.276779  149.93973  113.42907
+r39  37.915527  102.95947  61.671928
+r40  1.0616373  2.3876429  3.1597955
+r41  2.3165357  .16903175  .13036065
+r42  916.51825  128.50963  101.77602
+r43  2.5841138  13.284178  6.0275197
+r44  24.936562   110.7592  106.82823
+r45  1.5418637  2.3920083  3.3131697
+r46  1.3263092  2.3626635  1.9304264
+r47  150.07866   71.60759  56.813297
+r48  1.1877635  2.7982788  2.9511361
+r49  43.254181  54.511021  47.053238
+r50  .50054741  5.5585332  4.6795087
+r51  11.046886   67.89727  40.627701
+r52  .43636993  .11051138   .1229725
+r53  26.835297  82.423622  68.314102
+r54  798.91132  767.76208  640.17645
+r55  383.21194  600.07983  542.70764
+r56  4.9831929  23.048958  10.316508
+r57  263.70764   342.2265  262.55127
+r58  2597.5203  1880.5714  1426.8129
+r59  1291.7261  1415.0959  910.21948
+r60  47.285427  143.82228  184.50206
+
+. 
+. * read in labor shares
+. use "data/derived/preparedshares.dta", clear
+
+. 
+. foreach X of num 1/$S {
+  2.     ren share`X' Fs`X'
+  3. }
+
+. 
+. * min var portfolio
+. count
+  1,003
+
+. gen b0 = .
+(1,003 missing values generated)
+
+. gen b1 = .
+(1,003 missing values generated)
+
+. gen b2 = .
+(1,003 missing values generated)
+
+. gen m = .
+(1,003 missing values generated)
+
+. gen TAU2=.
+(1,003 missing values generated)
+
+. gen BETA=.
+(1,003 missing values generated)
+
+. 
+. forval Y=1/$S {
+  2.         matrix nicelittlevector=Varind["Fs`Y'",1..$S]
+  3.         matrix score SigmaFs`Y'=nicelittlevector
+  4.         replace SigmaFs`Y'=SigmaFs`Y'*Fs`Y'
+  5. }
+(1,003 real changes made)
+(1,003 real changes made)
+(1,003 real changes made)
+
+. forval Y=1/$S {
+  2.         gen sqFs`Y'=Fs`Y'^2
+  3. }
+
+. egen SECT=rsum(SigmaFs1 - SigmaFs$S)
+
+. su SECT
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        SECT |      1,003    .0062159    .0029218   .0009402   .0104022
+
+. egen HERF=rsum(sqFs1 - sqFs$S)
+
+. replace HERF=HERF*sigma2
+(1,003 real changes made)
+
+. su HERF
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        HERF |      1,003    .0581286    .0101583   .0426459   .0840785
+
+. 
+. * del Negro's HERF is dnHERF
+. * this is a weighted sum of squares
+. gen dnHERF=0
+
+. forval s = 1/$S {
+  2.         forval j = 1/$J {
+  3.                 replace dnHERF = dnHERF+sqFs`s'*dnsigma2[`s',`j'] if count
+> ry==`j'
+  4.         }
+  5. }
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(19 real changes made)
+(20 real changes made)
+(10 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(11 real changes made)
+(20 real changes made)
+(14 real changes made)
+(16 real changes made)
+(20 real changes made)
+(15 real changes made)
+(19 real changes made)
+(10 real changes made)
+(14 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(20 real changes made)
+(18 real changes made)
+(12 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(10 real changes made)
+(20 real changes made)
+(10 real changes made)
+(14 real changes made)
+(12 real changes made)
+(19 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(16 real changes made)
+(15 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(11 real changes made)
+(10 real changes made)
+(13 real changes made)
+(17 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(19 real changes made)
+(20 real changes made)
+(10 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(11 real changes made)
+(20 real changes made)
+(14 real changes made)
+(16 real changes made)
+(20 real changes made)
+(15 real changes made)
+(19 real changes made)
+(10 real changes made)
+(14 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(20 real changes made)
+(18 real changes made)
+(12 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(10 real changes made)
+(20 real changes made)
+(10 real changes made)
+(14 real changes made)
+(12 real changes made)
+(19 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(16 real changes made)
+(15 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(11 real changes made)
+(10 real changes made)
+(13 real changes made)
+(17 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(19 real changes made)
+(20 real changes made)
+(10 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(11 real changes made)
+(20 real changes made)
+(14 real changes made)
+(16 real changes made)
+(20 real changes made)
+(15 real changes made)
+(19 real changes made)
+(10 real changes made)
+(14 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(20 real changes made)
+(18 real changes made)
+(12 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(10 real changes made)
+(20 real changes made)
+(20 real changes made)
+(17 real changes made)
+(10 real changes made)
+(20 real changes made)
+(10 real changes made)
+(14 real changes made)
+(12 real changes made)
+(19 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(16 real changes made)
+(15 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(11 real changes made)
+(10 real changes made)
+(13 real changes made)
+(17 real changes made)
+
+. 
+. **this calculates the residual
+. matrix residual=J($S,1,0)
+
+. matrix residual = dnsigma2 * J($J,1,1/$J)
+
+. forval X = 1/$J {
+  2.     di in gre "Country # " in ye `X'
+  3. ********* have to change omega here if we want to use dnHERF
+. * this is the old one, just in case
+. *    matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1
+> ,1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(
+> Varcnt,"Fc`X'")]*J($S,$S,1)+sigma2*I($S)
+. * and here comes the new one
+.     matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1,
+> 1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(V
+> arcnt,"Fc`X'")]*J($S,$S,1)+diag(dnsigma2[1..$S,`X'])
+  4.     matrix mu = Mu[`X',1..$S]
+  5. 
+. 
+. 
+. * this calcs current mean return using labor shares
+.     capture drop mtemp
+  6.     matrix score mtemp = mu
+  7.     replace m=mtemp if country==`X'
+  8. 
+.     matrix A = (mu*inv(Omega)*mu', J(1,$S,1)*inv(Omega)*mu' \ J(1,$S,1)*inv(O
+> mega)*mu' , J(1,$S,1)*inv(Omega)*J($S,1,1))
+  9.     matrix core = inv(A) 
+ 10. * the previous formula was the same but longer
+.     replace b0 = core[2,2] if country==`X'
+ 11.     replace b1 = core[2,1]+core[1,2] if country==`X'
+ 12.     replace b2 = core[1,1] if country==`X'
+ 13. 
+.         replace TAU2 = Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(Varcnt,"Fc`X'")
+> ] if country==`X'
+ 14.         capture drop BETAtmp
+ 15.         matrix nicelittlevector=Covindcnt["Fc`X'","Fs1".."Fs$S"]
+ 16.         matrix score BETAtmp = nicelittlevector
+ 17.         replace BETA = BETAtmp/TAU2 if country==`X'
+ 18. 
+. }
+Country # 1
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 2
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 3
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 4
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 5
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+Country # 6
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 7
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 8
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+Country # 9
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 10
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 11
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+Country # 12
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 13
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+Country # 14
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+Country # 15
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 16
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+Country # 17
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+Country # 18
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 19
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+Country # 20
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 21
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 22
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 23
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+Country # 24
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 25
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 26
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+Country # 27
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 28
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 29
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 30
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 31
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 32
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 33
+(18 real changes made)
+(18 real changes made)
+(18 real changes made)
+(18 real changes made)
+(18 real changes made)
+(18 real changes made)
+Country # 34
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+Country # 35
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 36
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 37
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 38
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 39
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 40
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 41
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+Country # 42
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 43
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 44
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 45
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+(14 real changes made)
+Country # 46
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+(12 real changes made)
+Country # 47
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+(19 real changes made)
+Country # 48
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 49
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 50
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 51
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 52
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+(16 real changes made)
+Country # 53
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+(15 real changes made)
+Country # 54
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 55
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 56
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 57
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+(11 real changes made)
+Country # 58
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+(10 real changes made)
+Country # 59
+(13 real changes made)
+(13 real changes made)
+(13 real changes made)
+(13 real changes made)
+(13 real changes made)
+(13 real changes made)
+Country # 60
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+(17 real changes made)
+
+. 
+. gen V = b0+b1*m+b2*m^2
+
+. * this is the lowest risk for the given mean
+. 
+. gen RISK = SECT+HERF+2*BETA*TAU2+TAU2
+
+. gen dnRISK = SECT+dnHERF+2*BETA*TAU2+TAU2
+
+. * this is the overall 
+. 
+. gen COV2 = 2*BETA*TAU2
+
+. 
+. gen MIN = b0-b1^2/(4*b2)
+
+. * this is the absolute lowest risk
+. 
+. gen minM = -b1/(2*b2)
+
+. * this is the corresponding mean
+. 
+. 
+. * how many years in sample?
+. egen N = count(Fs1), by(country)
+
+. 
+. sort cnum year
+
+. 
+. tempfile sm
+
+. save `sm', replace 
+(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01543.000001 no
 > t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01541.000001 saved
-
-. 
-. * save country correspondence
-. collapse (count) epsilon, by(cnum country)
-
-. drop epsilon
-
-. sort cnum
-
-. save "data/derived/countries.dta", replace
-file data/derived/countries.dta saved
-
-. 
-. use `factors', clear
-
-. 
-. collapse (mean) indf, by(sector year)
-
-. ren indf Fs
-
-. reshape wide Fs, i(year) j(sector)
-(note: j = 1 2 3)
-
-Data                               long   ->   wide
------------------------------------------------------------------------------
-Number of obs.                       60   ->      20
-Number of variables                   3   ->       4
-j variable (3 values)            sector   ->   (dropped)
-xij variables:
-                                     Fs   ->   Fs1 Fs2 Fs3
------------------------------------------------------------------------------
-
-. 
-. sort year
-
-. save `indfactors', replace
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01541.000002 no
-> t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01541.000002 saved
+file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01543.000001 saved
 
 . 
 . 
-. * do the same for cnt factors
-. use `factors'
+. * now merge with stuff
+. use "data/wdi/wdinew.dta", clear
 
-. 
-. collapse (mean) cntf, by(country year)
+. keep cnum cname year rgdppcp pop 
 
-. ren cntf Fc
+. sort cnum year
 
-. reshape wide Fc, i(year) j(country)
-(note: j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
->  27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 5
-> 2 53 54 55 56 57 58 59 60)
-
-Data                               long   ->   wide
------------------------------------------------------------------------------
-Number of obs.                     1003   ->      20
-Number of variables                   3   ->      61
-j variable (60 values)          country   ->   (dropped)
-xij variables:
-                                     Fc   ->   Fc1 Fc2 ... Fc60
------------------------------------------------------------------------------
-
-. 
-. sort year
-
-. merge year using `indfactors'
+. merge cnum year using `sm'
 (note: you are using old merge syntax; see [D] merge for new syntax)
-
-. tab _
-
-     _merge |      Freq.     Percent        Cum.
-------------+-----------------------------------
-          3 |         20      100.00      100.00
-------------+-----------------------------------
-      Total |         20      100.00
 
 . drop _
 
-. 
-. * how many countries in a year?
-. egen Jt = robs(Fc*)
+. sort cnum year
 
-. 
-. sort year
-
-. save "data/derived/allfactors.dta", replace 
-file data/derived/allfactors.dta saved
-
-. 
-. keep year Jt
-
-. sort year
-
-. save "data/derived/Jt.dta", replace
-file data/derived/Jt.dta saved
+. save "data/derived/specmeasures.dta", replace
+(note: file data/derived/specmeasures.dta not found)
+file data/derived/specmeasures.dta saved
 
 . 
 . 
