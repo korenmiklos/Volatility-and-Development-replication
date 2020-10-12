@@ -2,7 +2,7 @@
 clear
 set mem 500m
 ***data is ccode variable (many) V_year1 ---V_yearT
-insheet using C:/P1-div/shares_ilo1.csv
+insheet using "shares_ilo1.csv"
 reshape long v_, i(ccode indcode) string
 ren _j year
 rename v_ share
@@ -18,12 +18,14 @@ egen sumshare = sum(share), by(ccode year)
 drop if sumshare==0 
 drop sumshare
 sort ccode year sector
-save temp.dta, replace
+
+tempfile shares
+save `shares', replace
 
 
 ******WDI data
 ***data is ccode variable (many) V_year1 ---V_yearT
-insheet using C:/P1-div/sectoraldata.csv, clear
+insheet using "sectoraldata.csv", clear
 reshape long v_, i(ccode variable) string
 ren _j year
 reshape wide v_, i(ccode  year) j( variable) string
@@ -40,7 +42,8 @@ ren emind empshare300
 ren empser empshare500
 reshape long yshare empshare, i(ccode year) j(sector) 
 sort ccode year sector
-merge ccode year sector using temp.dta
+
+merge ccode year sector using `shares'
 tab _
 drop _
 destring, replace
@@ -55,7 +58,6 @@ egen sumempshare = sum(empshare), by(ccode year)
 drop if sumemp==0
 replace empshare=empshare/sumempshare*100
 
-
-save C:/P1-div/wdiilo.dta, replace
+save "wdiilo.dta", replace
 
 
