@@ -1692,9 +1692,9 @@ Country # 60
 . tempfile sm
 
 . save `sm', replace 
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01543.000001 no
+(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01680.000001 no
 > t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01543.000001 saved
+file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01680.000001 saved
 
 . 
 . 
@@ -1712,8 +1712,20 @@ file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01543.000001 saved
 
 . sort cnum year
 
+. 
+. merge 1:1 cnum year using "data/pwt/pwt1.dta", keep(master match) nogen
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                         2,480
+        from master                     2,480  
+        from using                          0  
+
+    matched                             5,760  
+    -----------------------------------------
+
+. 
 . save "data/derived/specmeasures.dta", replace
-(note: file data/derived/specmeasures.dta not found)
 file data/derived/specmeasures.dta saved
 
 . 

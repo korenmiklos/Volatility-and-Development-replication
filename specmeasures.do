@@ -140,5 +140,8 @@ sort cnum year
 merge cnum year using `sm'
 drop _
 sort cnum year
+
+merge 1:1 cnum year using "data/pwt/pwt1.dta", keep(master match) nogen
+
 save "data/derived/specmeasures.dta", replace
 

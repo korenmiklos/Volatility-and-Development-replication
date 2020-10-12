@@ -1,9 +1,9 @@
 use "data/derived/specmeasures.dta", clear
 tsset, clear
 
-drop if rgdppcp==0
+drop if rgdpch==0
 
-gen loggdp = log(rgdppcp)
+gen loggdp = log(rgdpch)
 
 rename COV Sector_Country_Covariance
 rename SECT Sectoral_Risk
