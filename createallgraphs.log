@@ -1,0 +1,333 @@
+
+  ___  ____  ____  ____  ____ (R)
+ /__    /   ____/   /   ____/
+___/   /   /___/   /   /___/   16.0   Copyright 1985-2019 StataCorp LLC
+  Statistics/Data Analysis            StataCorp
+                                      4905 Lakeway Drive
+     MP - Parallel Edition            College Station, Texas 77845 USA
+                                      800-STATA-PC        http://www.stata.com
+                                      979-696-4600        stata@stata.com
+                                      979-696-4601 (fax)
+
+Single-user 2-core Stata perpetual license:
+       Serial number:  501606204617
+         Licensed to:  Miklos Koren
+                       CEU MicroData
+
+Notes:
+      1.  Stata is running in batch mode.
+      2.  Unicode is supported; see help unicode_advice.
+      3.  More than 2 billion observations are allowed; see help obs_advice.
+      4.  Maximum number of variables is set to 5000; see help set_maxvar.
+
+. do createallgraphs.do 
+
+. use "data/derived/specmeasures.dta", clear
+
+. tsset, clear
+
+. 
+. drop if rgdppcp==0
+(1 observation deleted)
+
+. 
+. gen loggdp = log(rgdppcp)
+(2,678 missing values generated)
+
+. 
+. rename COV Sector_Country_Covariance
+
+. rename SECT Sectoral_Risk
+
+. rename HERF Herfindahl
+
+. rename dnHERF Weighted_Herf
+
+. rename TAU2 Country_Risk
+
+. rename dnRISK Overall_risk
+
+. rename BETA Sector_Country_Beta
+
+. 
+. label var loggdp "Log Real GDP per capita (PPP)"
+
+. 
+. label var Herfindahl "Herfindahl Index"
+
+. label var Weighted_Herf "Weighted Herfindahl"
+
+. label var Sectoral_Risk "Sectoral Risk"
+
+. label var Country_Risk "Country Risk"
+
+. label var Overall_risk "Overall Risk"
+
+. label var Sector_Country_Beta "Sector-Country Beta"
+
+. label var Sector_Country_Covariance "Sector-Country Covariance"
+
+. 
+. 
+. foreach X of varlist  Herfindahl Weighted_Herf Sectoral_Risk Sector_Country_B
+> eta {
+  2.         do drawgraphs `X' loggdp
+  3. }
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manua
+> l) plotregion(ilwidth(medthin))
+
+. 
+. 
+. graph export "graphs/lowess_`1'_`2'.eps", replace
+(file graphs/lowess_Herfindahl_loggdp.eps written in EPS format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs     =      1,003
+Group variable: country                         Number of groups  =         60
+
+R-sq:                                           Obs per group:
+     within  = 0.0515                                         min =         10
+     between = 0.2563                                         avg =       16.7
+     overall = 0.2554                                         max =         20
+
+                                                F(1,942)          =      51.10
+corr(u_i, Xb)  = -0.3441                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+  Herfindahl |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |   .0057505   .0008045     7.15   0.000     .0041717    .0073292
+       _cons |   .0085782   .0069331     1.24   0.216     -.005028    .0221843
+-------------+----------------------------------------------------------------
+     sigma_u |  .00881256
+     sigma_e |  .00429856
+         rho |  .80780305   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(59, 942) = 54.66                    Prob > F = 0.0000
+
+. predict u, u
+(7,236 missing values generated)
+
+. gen `1'within = `1'-u
+(7,236 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
+> 1manual) plotregion(ilwidth(medthin))
+
+. 
+. graph export "graphs/within_`1'_`2'.eps", replace
+(file graphs/within_Herfindahl_loggdp.eps written in EPS format)
+
+. 
+. 
+end of do-file
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manua
+> l) plotregion(ilwidth(medthin))
+
+. 
+. 
+. graph export "graphs/lowess_`1'_`2'.eps", replace
+(file graphs/lowess_Weighted_Herf_loggdp.eps written in EPS format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs     =      1,003
+Group variable: country                         Number of groups  =         60
+
+R-sq:                                           Obs per group:
+     within  = 0.0006                                         min =         10
+     between = 0.0189                                         avg =       16.7
+     overall = 0.0239                                         max =         20
+
+                                                F(1,942)          =       0.57
+corr(u_i, Xb)  = -0.2125                        Prob > F          =     0.4521
+
+------------------------------------------------------------------------------
+Weighted_H~f |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |   .0053858   .0071601     0.75   0.452    -.0086658    .0194375
+       _cons |  -.0029958   .0617089    -0.05   0.961    -.1240987    .1181071
+-------------+----------------------------------------------------------------
+     sigma_u |  .13602381
+     sigma_e |  .03825975
+         rho |  .92668601   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(59, 942) = 211.26                   Prob > F = 0.0000
+
+. predict u, u
+(7,236 missing values generated)
+
+. gen `1'within = `1'-u
+(7,236 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
+> 1manual) plotregion(ilwidth(medthin))
+
+. 
+. graph export "graphs/within_`1'_`2'.eps", replace
+(file graphs/within_Weighted_Herf_loggdp.eps written in EPS format)
+
+. 
+. 
+end of do-file
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manua
+> l) plotregion(ilwidth(medthin))
+
+. 
+. 
+. graph export "graphs/lowess_`1'_`2'.eps", replace
+(file graphs/lowess_Sectoral_Risk_loggdp.eps written in EPS format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs     =      1,003
+Group variable: country                         Number of groups  =         60
+
+R-sq:                                           Obs per group:
+     within  = 0.1078                                         min =         10
+     between = 0.5749                                         avg =       16.7
+     overall = 0.5694                                         max =         20
+
+                                                F(1,942)          =     113.85
+corr(u_i, Xb)  = -0.0818                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+Sectoral_R~k |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |   .0016955   .0001589    10.67   0.000     .0013836    .0020073
+       _cons |  -.0083936   .0013695    -6.13   0.000    -.0110812   -.0057061
+-------------+----------------------------------------------------------------
+     sigma_u |  .00187861
+     sigma_e |  .00084907
+         rho |  .83037457   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(59, 942) = 70.63                    Prob > F = 0.0000
+
+. predict u, u
+(7,236 missing values generated)
+
+. gen `1'within = `1'-u
+(7,236 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
+> 1manual) plotregion(ilwidth(medthin))
+
+. 
+. graph export "graphs/within_`1'_`2'.eps", replace
+(file graphs/within_Sectoral_Risk_loggdp.eps written in EPS format)
+
+. 
+. 
+end of do-file
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manua
+> l) plotregion(ilwidth(medthin))
+
+. 
+. 
+. graph export "graphs/lowess_`1'_`2'.eps", replace
+(file graphs/lowess_Sector_Country_Beta_loggdp.eps written in EPS format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs     =      1,003
+Group variable: country                         Number of groups  =         60
+
+R-sq:                                           Obs per group:
+     within  = 0.0806                                         min =         10
+     between = 0.0616                                         avg =       16.7
+     overall = 0.0766                                         max =         20
+
+                                                F(1,942)          =      82.56
+corr(u_i, Xb)  = 0.1041                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+Sector_Cou~a |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |  -.0578958   .0063717    -9.09   0.000    -.0704002   -.0453915
+       _cons |   .1603531   .0549139     2.92   0.004     .0525853    .2681209
+-------------+----------------------------------------------------------------
+     sigma_u |  .43535077
+     sigma_e |  .03404681
+         rho |  .99392108   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(59, 942) = 2772.53                  Prob > F = 0.0000
+
+. predict u, u
+(7,236 missing values generated)
+
+. gen `1'within = `1'-u
+(7,236 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
+> 1manual) plotregion(ilwidth(medthin))
+
+. 
+. graph export "graphs/within_`1'_`2'.eps", replace
+(file graphs/within_Sector_Country_Beta_loggdp.eps written in EPS format)
+
+. 
+. 
+end of do-file
+
+. 
+. lowess Country_Risk loggdp if year==1990, msize(tiny) scheme(s1mono)
+
+. graph export "graphs/lowess_Country_Risk_loggdp.eps",  replace
+(file graphs/lowess_Country_Risk_loggdp.eps written in EPS format)
+
+. 
+. 
+end of do-file

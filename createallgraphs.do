@@ -1,38 +1,33 @@
-capture log close
-set logtype text
-
-log using "now we're creating all the beautiful graphs", replace
-
-use specmeasures, clear
-
+use "data/derived/specmeasures.dta", clear
 tsset, clear
 
 drop if rgdppcp==0
+
 gen loggdp = log(rgdppcp)
 
-label var loggdp "Log GDP per capita (constant 1995 US$)"
+rename COV Sector_Country_Covariance
+rename SECT Sectoral_Risk
+rename HERF Herfindahl
+rename dnHERF Weighted_Herf
+rename TAU2 Country_Risk
+rename dnRISK Overall_risk
+rename BETA Sector_Country_Beta
 
-label var herf "Herfindahl index"
-label var specind "Industry risk"
-label var tau2 "Country risk"
-label var risk "Overall risk"
-label var betacnt "Industry beta"
+label var loggdp "Log Real GDP per capita (PPP)"
 
-label var share1 "Food+beverage+tobacco"
-*
-*
+label var Herfindahl "Herfindahl Index"
+label var Weighted_Herf "Weighted Herfindahl"
+label var Sectoral_Risk "Sectoral Risk"
+label var Country_Risk "Country Risk"
+label var Overall_risk "Overall Risk"
+label var Sector_Country_Beta "Sector-Country Beta"
+label var Sector_Country_Covariance "Sector-Country Covariance"
 
 
-for var herf specind speccnt tau2 risk: gen X_rescaled = X/minrisk
-for var herf specind tau2 risk speccnt: global varlab: var label X \label var X_rescaled "$varlab X rel. to min. var."
+foreach X of varlist  Herfindahl Weighted_Herf Sectoral_Risk Sector_Country_Beta {
+	do drawgraphs `X' loggdp
+}
 
-do drawgraphs herf specind
+lowess Country_Risk loggdp if year==1990, msize(tiny) scheme(s1mono)
+graph export "graphs/lowess_Country_Risk_loggdp.eps",  replace
 
-for var herf specind tau2 risk betacnt: do drawgraphs X loggdp
-for var herf specind tau2 risk: do drawgraphs X_rescaled loggdp
-
-for var share*: do drawgraphs X loggdp
-for var share*: do drawgraphs herf X 
-for var share*: do drawgraphs specind X 
-
-log close
