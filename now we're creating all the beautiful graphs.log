@@ -1,0 +1,500 @@
+-------------------------------------------------------------------------------------------------------------
+       log:  C:\P1-Div\now we're creating all the beautiful graphs.log
+  log type:  text
+ opened on:  20 Jun 2005, 13:33:08
+
+. 
+. use c:/P1-Div/miklosjm/minimumvariance, clear
+
+. drop if cname==""
+(0 observations deleted)
+
+. drop if HERF==0
+(0 observations deleted)
+
+. 
+. tsset, clear
+
+. 
+. 
+. drop if rgdpch==0
+(0 observations deleted)
+
+. *USA = 840
+. 
+. 
+. 
+. gen loggdp = log(rgdpch)
+(3924 missing values generated)
+
+. lowess HERF loggdp , msize(tiny) scheme(s1mono)
+
+. 
+. rename COV Sector_Country_Covariance
+
+. rename SECT Sectoral_Risk
+
+. rename HERF Herfindahl
+
+. rename dnHERF Weighted_Herf
+
+. rename TAU2 Country_Risk
+
+. rename dnRISK Overall_risk
+
+. rename BETA Sector_Country_Beta
+
+. *rename Fs2 Textiles
+. *rename Fs16 Electric_Machinery
+. rename DIST1 Dist_to_Own_Frontier
+
+. rename DIST2 Dist_to_World_Frontier
+
+. 
+. label var loggdp "Log Real GDP per capita (PPP)"
+
+. 
+. 
+. 
+. label var Herfindahl "Herfindahl Index"
+
+. label var Weighted_Herf "Weighted Herfindahl"
+
+. label var Sectoral_Risk "Sectoral Risk"
+
+. label var Country_Risk "Country Risk"
+
+. label var Overall_risk "Overall Risk"
+
+. label var Sector_Country_Beta "Sector-Country Beta"
+
+. label var Sector_Country_Covariance "Sector-Country Covariance"
+
+. *label var Textiles "Textiles"
+. *label var Electric_Machinery "Electric Machinery"
+. label var Dist_to_Own_Frontier "Distance to Own Frontier"
+
+. label var Dist_to_World_Frontier "Distance of Own to World Frontier"
+
+. 
+. 
+. 
+. 
+. 
+. 
+. foreach X of varlist  Herfindahl Weighted_Herf Sectoral_Risk Sector_Country_Cov Dist_to_Own_Frontier Dist_t
+> o_World_Frontier {
+  2.         do drawgraphs `X' loggdp
+  3. }
+
+. 
+. set more off
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(medthin)
+> )
+
+. 
+. 
+. graph export "c:/P1-Div/miklosjm/lowess_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/lowess_Herfindahl_loggdp.ps written in PostScript format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs      =       334
+Group variable (i): country                     Number of groups   =        14
+
+R-sq:  within  = 0.0347                         Obs per group: min =        19
+       between = 0.0442                                        avg =      23.9
+       overall = 0.0419                                        max =        25
+
+                                                F(1,319)           =     11.45
+corr(u_i, Xb)  = -0.0197                        Prob > F           =    0.0008
+
+------------------------------------------------------------------------------
+  Herfindahl |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |   .0002693   .0000796     3.38   0.001     .0001127    .0004258
+       _cons |  -.0001539   .0007782    -0.20   0.843    -.0016849    .0013771
+-------------+----------------------------------------------------------------
+     sigma_u |  .00029384
+     sigma_e |  .00026821
+         rho |  .54551106   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0:     F(13, 319) =    28.46             Prob > F = 0.0000
+
+. predict u, u
+(7906 missing values generated)
+
+. gen `1'within = `1'-u
+(7906 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(me
+> dthin))
+
+. 
+. graph export "c:/P1-Div/miklosjm/within_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/within_Herfindahl_loggdp.ps written in PostScript format)
+
+. 
+. set more on
+
+. 
+end of do-file
+
+. 
+. set more off
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(medthin)
+> )
+
+. 
+. 
+. graph export "c:/P1-Div/miklosjm/lowess_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/lowess_Weighted_Herf_loggdp.ps written in PostScript format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs      =       334
+Group variable (i): country                     Number of groups   =        14
+
+R-sq:  within  = 0.1500                         Obs per group: min =        19
+       between = 0.6429                                        avg =      23.9
+       overall = 0.3957                                        max =        25
+
+                                                F(1,319)           =     56.27
+corr(u_i, Xb)  = -0.6944                        Prob > F           =    0.0000
+
+------------------------------------------------------------------------------
+Weighted_H~f |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |   .0002582   .0000344     7.50   0.000     .0001905    .0003259
+       _cons |  -.0015931   .0003366    -4.73   0.000    -.0022553   -.0009309
+-------------+----------------------------------------------------------------
+     sigma_u |  .00082931
+     sigma_e |  .00011601
+         rho |  .98080869   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0:     F(13, 319) =   656.91             Prob > F = 0.0000
+
+. predict u, u
+(7906 missing values generated)
+
+. gen `1'within = `1'-u
+(7906 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(me
+> dthin))
+
+. 
+. graph export "c:/P1-Div/miklosjm/within_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/within_Weighted_Herf_loggdp.ps written in PostScript format)
+
+. 
+. set more on
+
+. 
+end of do-file
+
+. 
+. set more off
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(medthin)
+> )
+
+. 
+. 
+. graph export "c:/P1-Div/miklosjm/lowess_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/lowess_Sectoral_Risk_loggdp.ps written in PostScript format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs      =       334
+Group variable (i): country                     Number of groups   =        14
+
+R-sq:  within  = 0.3736                         Obs per group: min =        19
+       between = 0.6015                                        avg =      23.9
+       overall = 0.5260                                        max =        25
+
+                                                F(1,319)           =    190.29
+corr(u_i, Xb)  = 0.4884                         Prob > F           =    0.0000
+
+------------------------------------------------------------------------------
+Sectoral_R~k |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |  -.0004932   .0000358   -13.79   0.000    -.0005635   -.0004228
+       _cons |   .0128158   .0003497    36.65   0.000     .0121279    .0135037
+-------------+----------------------------------------------------------------
+     sigma_u |   .0003136
+     sigma_e |  .00012051
+         rho |  .87132091   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0:     F(13, 319) =   125.62             Prob > F = 0.0000
+
+. predict u, u
+(7906 missing values generated)
+
+. gen `1'within = `1'-u
+(7906 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(me
+> dthin))
+
+. 
+. graph export "c:/P1-Div/miklosjm/within_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/within_Sectoral_Risk_loggdp.ps written in PostScript format)
+
+. 
+. set more on
+
+. 
+end of do-file
+
+. 
+. set more off
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(medthin)
+> )
+
+. 
+. 
+. graph export "c:/P1-Div/miklosjm/lowess_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/lowess_Sector_Country_Covariance_loggdp.ps written in PostScript format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs      =       334
+Group variable (i): country                     Number of groups   =        14
+
+R-sq:  within  = 0.1903                         Obs per group: min =        19
+       between = 0.0513                                        avg =      23.9
+       overall = 0.0332                                        max =        25
+
+                                                F(1,319)           =     75.00
+corr(u_i, Xb)  = 0.1686                         Prob > F           =    0.0000
+
+------------------------------------------------------------------------------
+Sector_Cou~e |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |   .0001371   .0000158     8.66   0.000      .000106    .0001682
+       _cons |  -.0014851   .0001548    -9.59   0.000    -.0017897   -.0011805
+-------------+----------------------------------------------------------------
+     sigma_u |  .00320073
+     sigma_e |  .00005337
+         rho |  .99972209   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0:     F(13, 319) = 86152.30             Prob > F = 0.0000
+
+. predict u, u
+(7906 missing values generated)
+
+. gen `1'within = `1'-u
+(7906 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(me
+> dthin))
+
+. 
+. graph export "c:/P1-Div/miklosjm/within_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/within_Sector_Country_Covariance_loggdp.ps written in PostScript format)
+
+. 
+. set more on
+
+. 
+end of do-file
+
+. 
+. set more off
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(medthin)
+> )
+
+. 
+. 
+. graph export "c:/P1-Div/miklosjm/lowess_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/lowess_Dist_to_Own_Frontier_loggdp.ps written in PostScript format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs      =       334
+Group variable (i): country                     Number of groups   =        14
+
+R-sq:  within  = 0.0128                         Obs per group: min =        19
+       between = 0.0190                                        avg =      23.9
+       overall = 0.0094                                        max =        25
+
+                                                F(1,319)           =      4.14
+corr(u_i, Xb)  = -0.1136                        Prob > F           =    0.0426
+
+------------------------------------------------------------------------------
+Dist_to_Ow~r |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |  -.0000979   .0000481    -2.04   0.043    -.0001926   -3.28e-06
+       _cons |   .0065744   .0004705    13.97   0.000     .0056488       .0075
+-------------+----------------------------------------------------------------
+     sigma_u |  .00193754
+     sigma_e |  .00016215
+         rho |  .99304449   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0:     F(13, 319) =  3384.26             Prob > F = 0.0000
+
+. predict u, u
+(7906 missing values generated)
+
+. gen `1'within = `1'-u
+(7906 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(me
+> dthin))
+
+. 
+. graph export "c:/P1-Div/miklosjm/within_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/within_Dist_to_Own_Frontier_loggdp.ps written in PostScript format)
+
+. 
+. set more on
+
+. 
+end of do-file
+
+. 
+. set more off
+
+. 
+. capture drop u
+
+. capture drop fitted
+
+. capture drop `1'within
+
+. 
+. lowess `1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(medthin)
+> )
+
+. 
+. 
+. graph export "c:/P1-Div/miklosjm/lowess_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/lowess_Dist_to_World_Frontier_loggdp.ps written in PostScript format)
+
+. 
+. 
+. 
+. xtreg `1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs      =       334
+Group variable (i): country                     Number of groups   =        14
+
+R-sq:  within  = 0.4547                         Obs per group: min =        19
+       between = 0.0836                                        avg =      23.9
+       overall = 0.0765                                        max =        25
+
+                                                F(1,319)           =    266.01
+corr(u_i, Xb)  = 0.2143                         Prob > F           =    0.0000
+
+------------------------------------------------------------------------------
+Dist_to_Wo~r |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |  -.0001701   .0000104   -16.31   0.000    -.0001907   -.0001496
+       _cons |   .0025291    .000102    24.79   0.000     .0023284    .0027299
+-------------+----------------------------------------------------------------
+     sigma_u |  .00086049
+     sigma_e |  .00003517
+         rho |  .99833268   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0:     F(13, 319) = 13024.37             Prob > F = 0.0000
+
+. predict u, u
+(7906 missing values generated)
+
+. gen `1'within = `1'-u
+(7906 missing values generated)
+
+. 
+. lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manual) plotregion(ilwidth(me
+> dthin))
+
+. 
+. graph export "c:/P1-Div/miklosjm/within_`1'_`2'.ps", as(ps) replace
+(file c:/P1-Div/miklosjm/within_Dist_to_World_Frontier_loggdp.ps written in PostScript format)
+
+. 
+. set more on
+
+. 
+end of do-file
+
+. 
+. *lowess Country_Risk loggdp if year==1980 &Country_Risk<.04, msize(tiny) scheme(s1mono)
+. 
+. 
+. lowess Country_Risk loggdp if year==1980, msize(tiny) scheme(s1mono)
+
+. graph export "c:/P1-Div/miklosjm/Country_Risk.ps", as(ps) replace
+(note: file c:/P1-Div/miklosjm/Country_Risk.ps not found)
+(file c:/P1-Div/miklosjm/Country_Risk.ps written in PostScript format)
+
+. log close
+       log:  C:\P1-Div\now we're creating all the beautiful graphs.log
+  log type:  text
+ closed on:  20 Jun 2005, 13:33:38
+-------------------------------------------------------------------------------------------------------------

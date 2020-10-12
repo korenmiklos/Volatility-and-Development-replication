@@ -1,0 +1,25 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+       log:  C:\P1-Div\these are the spec measures oct 28.log
+  log type:  text
+ opened on:   3 Feb 2006, 15:16:07
+
+. 
+. * prelims
+. set more off
+
+. * set matsize 5000
+. use allfactors_wide30, clear
+
+. 
+. global DIR .
+
+. 
+. * estimate pairwise covariances 
+. matrix S = J($S+$J,$S+$J,0)
++ not found
+r(111);
+
+end of do-file
+r(111);
+
+. exit, clear

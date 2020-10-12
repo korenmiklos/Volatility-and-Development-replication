@@ -1,0 +1,38 @@
+--------------------------------------------------------------------------------
+       log:  C:\P1-Div\factors by subsamples 1204.log
+  log type:  text
+ opened on:  20 Jun 2005, 10:57:36
+
+. 
+. 
+. * prelims
+. clear
+
+. set mem 128m
+
+Current memory allocation
+
+                    current                                 memory usage
+    settable          value     description                 (1M = 1024k)
+    --------------------------------------------------------------------
+    set maxvar         5000     max. variables allowed           1.733M
+    set memory          128M    max. data space                128.000M
+    set matsize         800     max. RHS vars in models          4.950M
+                                                            -----------
+                                                               134.682M
+
+. * we don't need this yet
+. * set matsize 3000
+. set more off
+
+. 
+. use shares_long30_split, clear
+file shares_long30_split.dta not found
+r(601);
+
+end of do-file
+r(601);
+
+. do "C:\DOCUME~1\tenreyro\LOCALS~1\Temp\STD0b000000.tmp"
+
+. capture log close

@@ -1,0 +1,33 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+       log:  C:\P1-Div\mean returns oct 17.log
+  log type:  text
+ opened on:   2 Feb 2006, 11:56:37
+
+. 
+. global DIR .
+
+. 
+. * prelims
+. clear
+
+. set mem 128m
+(131072k)
+
+. set matsize 800
+
+. set more off
+
+. *use 3sectors_valemp.dta, clear
+. *use 3sectors_oecd.dta, clear
+. *use 3sectors_wdi_4.dta, clear
+. *use 3sectors_wdi_4_oecdonly.dta, clear
+. *use oecd-dollar,clear
+. *use wdi_ido-dollar, clear
+. use $DIR/unido-dollar, clear
+file ./unido-dollar.dta not found
+r(601);
+
+end of do-file
+r(601);
+
+. exit, clear
