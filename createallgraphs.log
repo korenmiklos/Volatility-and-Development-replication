@@ -41,6 +41,8 @@ Notes:
 
 . rename HERF Herfindahl
 
+. rename AVAR Average_Variance 
+
 . rename IDIO Idiosyncratic_Risk
 
 . rename CNT Country_Risk
@@ -51,7 +53,9 @@ Notes:
 . label var loggdp "Log Real GDP per capita (PPP)"
 
 . 
-. label var Herfindahl "Herfindahl Index"
+. label var Herfindahl "Concentration"
+
+. label var Average_Variance "Average Idiosyncratic Variance"
 
 . label var Idiosyncratic_Risk "Idiosyncratic Risk"
 
@@ -66,7 +70,7 @@ Notes:
 . 
 . 
 . foreach X of varlist  Herfindahl Idiosyncratic_Risk Sectoral_Risk Sector_Coun
-> try_Covariance {
+> try_Covariance Average_Variance {
   2.         do drawgraphs `X' loggdp
   3. }
 
@@ -82,9 +86,15 @@ Notes:
 -------------+---------------------------------------------------------
   Herfindahl |      1,507    .1241311    .0560934   .0788353   .5599452
 
-. if (r(min) > 0) {
+. scalar min = r(min)
+
+. if (min > 0) {
 .         generate `y1' = ln(`1')
 (6,802 missing values generated)
+.         * demean all logs to have 0 mean
+.         summarize `y1', meanonly
+.         replace `y1' = `y1' - r(mean)
+(1,507 real changes made)
 .         label variable `y1' "`lbl' (log)"
 . }
 
@@ -97,8 +107,8 @@ Notes:
 (6,802 missing values generated)
 
 . 
-. lowess `y1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y1' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/lowess_`1'_`2'.eps", replace
 (file graphs/lowess_Herfindahl_loggdp.eps written in EPS format)
@@ -121,7 +131,7 @@ corr(u_i, Xb)  = -0.6953                        Prob > F          =     0.5483
     __000000 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
       loggdp |    .007358   .0122536     0.60   0.548    -.0166797    .0313958
-       _cons |  -2.208677   .1083659   -20.38   0.000    -2.421257   -1.996098
+       _cons |  -.0603654   .1083659    -0.56   0.578     -.272945    .1522141
 -------------+----------------------------------------------------------------
      sigma_u |   .3155699
      sigma_e |  .12783332
@@ -136,8 +146,8 @@ F test that all u_i=0: F(44, 1381) = 93.08                   Prob > F = 0.0000
 (1,507 real changes made, 80 to missing)
 
 . 
-. lowess `y2' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y2' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/within_`1'_`2'.eps", replace
 (file graphs/within_Herfindahl_loggdp.eps written in EPS format)
@@ -158,9 +168,15 @@ end of do-file
 -------------+---------------------------------------------------------
 Idiosyncra~k |      1,507    .0054294    .0062876   .0003165   .0328147
 
-. if (r(min) > 0) {
+. scalar min = r(min)
+
+. if (min > 0) {
 .         generate `y1' = ln(`1')
 (6,802 missing values generated)
+.         * demean all logs to have 0 mean
+.         summarize `y1', meanonly
+.         replace `y1' = `y1' - r(mean)
+(1,507 real changes made)
 .         label variable `y1' "`lbl' (log)"
 . }
 
@@ -173,8 +189,8 @@ Idiosyncra~k |      1,507    .0054294    .0062876   .0003165   .0328147
 (6,802 missing values generated)
 
 . 
-. lowess `y1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y1' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/lowess_`1'_`2'.eps", replace
 (file graphs/lowess_Idiosyncratic_Risk_loggdp.eps written in EPS format)
@@ -197,10 +213,10 @@ corr(u_i, Xb)  = -0.8006                        Prob > F          =     0.0000
     __000000 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
       loggdp |   .0757578   .0128698     5.89   0.000     .0505114    .1010042
-       _cons |  -6.539546   .1138148   -57.46   0.000    -6.762815   -6.316278
+       _cons |  -.6485447   .1138148    -5.70   0.000    -.8718132   -.4252761
 -------------+----------------------------------------------------------------
      sigma_u |   1.290303
-     sigma_e |  .13426105
+     sigma_e |  .13426106
          rho |  .98928876   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
 F test that all u_i=0: F(44, 1381) = 997.68                  Prob > F = 0.0000
@@ -212,8 +228,8 @@ F test that all u_i=0: F(44, 1381) = 997.68                  Prob > F = 0.0000
 (1,507 real changes made, 80 to missing)
 
 . 
-. lowess `y2' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y2' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/within_`1'_`2'.eps", replace
 (file graphs/within_Idiosyncratic_Risk_loggdp.eps written in EPS format)
@@ -234,9 +250,15 @@ end of do-file
 -------------+---------------------------------------------------------
 Sectoral_R~k |      1,507    .0037045    .0004958   .0026052   .0062056
 
-. if (r(min) > 0) {
+. scalar min = r(min)
+
+. if (min > 0) {
 .         generate `y1' = ln(`1')
 (6,802 missing values generated)
+.         * demean all logs to have 0 mean
+.         summarize `y1', meanonly
+.         replace `y1' = `y1' - r(mean)
+(1,507 real changes made)
 .         label variable `y1' "`lbl' (log)"
 . }
 
@@ -249,8 +271,8 @@ Sectoral_R~k |      1,507    .0037045    .0004958   .0026052   .0062056
 (6,802 missing values generated)
 
 . 
-. lowess `y1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y1' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/lowess_`1'_`2'.eps", replace
 (file graphs/lowess_Sectoral_Risk_loggdp.eps written in EPS format)
@@ -273,7 +295,7 @@ corr(u_i, Xb)  = -0.3117                        Prob > F          =     0.0000
     __000000 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
       loggdp |  -.1364966   .0035903   -38.02   0.000    -.1435396   -.1294536
-       _cons |  -4.396109   .0317508  -138.46   0.000    -4.458394   -4.333824
+       _cons |   1.210405   .0317508    38.12   0.000      1.14812     1.27269
 -------------+----------------------------------------------------------------
      sigma_u |  .08114316
      sigma_e |  .03745473
@@ -288,8 +310,8 @@ F test that all u_i=0: F(44, 1381) = 134.63                  Prob > F = 0.0000
 (1,507 real changes made, 80 to missing)
 
 . 
-. lowess `y2' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y2' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/within_`1'_`2'.eps", replace
 (file graphs/within_Sectoral_Risk_loggdp.eps written in EPS format)
@@ -310,8 +332,13 @@ end of do-file
 -------------+---------------------------------------------------------
 Sector_Cou~e |      1,507   -.0000518    .0081577  -.0206801   .0443218
 
-. if (r(min) > 0) {
+. scalar min = r(min)
+
+. if (min > 0) {
 .         generate `y1' = ln(`1')
+.         * demean all logs to have 0 mean
+.         summarize `y1', meanonly
+.         replace `y1' = `y1' - r(mean)
 .         label variable `y1' "`lbl' (log)"
 . }
 
@@ -325,11 +352,10 @@ Sector_Cou~e |      1,507   -.0000518    .0081577  -.0206801   .0443218
 (6,802 missing values generated)
 
 . 
-. lowess `y1' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y1' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/lowess_`1'_`2'.eps", replace
-(note: file graphs/lowess_Sector_Country_Covariance_loggdp.eps not found)
 (file graphs/lowess_Sector_Country_Covariance_loggdp.eps written in EPS format)
 
 . 
@@ -365,16 +391,109 @@ F test that all u_i=0: F(44, 1381) = 3220.66                 Prob > F = 0.0000
 (1,507 real changes made, 80 to missing)
 
 . 
-. lowess `y2' `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s1manu
-> al) plotregion(ilwidth(medthin))
+. lowess `y2' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
 
 . graph export "graphs/within_`1'_`2'.eps", replace
-(note: file graphs/within_Sector_Country_Covariance_loggdp.eps not found)
 (file graphs/within_Sector_Country_Covariance_loggdp.eps written in EPS format)
 
 . 
 . 
 end of do-file
+
+. tempvar y1 y2 u
+
+. local lbl : variable label `1'
+
+. 
+. * if risk measure is strictly positive, take logs
+. summarize `1'
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+Average_Va~e |      1,507    .0388369    .0398654   .0035157   .2396667
+
+. scalar min = r(min)
+
+. if (min > 0) {
+.         generate `y1' = ln(`1')
+(6,802 missing values generated)
+.         * demean all logs to have 0 mean
+.         summarize `y1', meanonly
+.         replace `y1' = `y1' - r(mean)
+(1,507 real changes made)
+.         label variable `y1' "`lbl' (log)"
+. }
+
+. else {
+.         generate `y1' = `1'
+.         label variable `y1' "`lbl'"
+. }
+
+. clonevar `y2' = `y1'
+(6,802 missing values generated)
+
+. 
+. lowess `y1' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
+
+. graph export "graphs/lowess_`1'_`2'.eps", replace
+(file graphs/lowess_Average_Variance_loggdp.eps written in EPS format)
+
+. 
+. xtreg `y1' `2', i(country) fe
+
+Fixed-effects (within) regression               Number of obs     =      1,427
+Group variable: country                         Number of groups  =         45
+
+R-sq:                                           Obs per group:
+     within  = 0.0423                                         min =         20
+     between = 0.5837                                         avg =       31.7
+     overall = 0.5162                                         max =         37
+
+                                                F(1,1381)         =      60.96
+corr(u_i, Xb)  = -0.7484                        Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+    __000000 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      loggdp |   .0683998   .0087609     7.81   0.000     .0512138    .0855858
+       _cons |  -.5881792   .0774774    -7.59   0.000    -.7401653   -.4361931
+-------------+----------------------------------------------------------------
+     sigma_u |  1.0933657
+     sigma_e |  .09139584
+         rho |  .99306098   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(44, 1381) = 1881.07                 Prob > F = 0.0000
+
+. predict `u', u
+(6,882 missing values generated)
+
+. replace `y2' = `y1' - `u'
+(1,507 real changes made, 80 to missing)
+
+. 
+. lowess `y2' `2', bwidth(0.5) msymbol(circle) msize(tiny) scheme(s1manual) plo
+> tregion(ilwidth(medthin))
+
+. graph export "graphs/within_`1'_`2'.eps", replace
+(file graphs/within_Average_Variance_loggdp.eps written in EPS format)
+
+. 
+. 
+end of do-file
+
+. 
+. replace Country_Risk = ln(Country_Risk)
+(1,507 real changes made)
+
+. * since log does not have a scale, set mean to 0
+. summarize Country_Risk, meanonly
+
+. replace Country_Risk = Country_Risk - r(mean)
+(1,507 real changes made)
+
+. label var Country_Risk "Country Risk (log)"
 
 . 
 . lowess Country_Risk loggdp if year==1980, msize(tiny) scheme(s1mono)

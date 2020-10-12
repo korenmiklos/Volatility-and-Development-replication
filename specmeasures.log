@@ -5041,9 +5041,12 @@ Country # 47
 (33 real changes made)
 
 . 
+. * this is the overall risk
 . gen RISK = GSECT + IDIO + CNT + COV
 
-. * this is the overall risk
+. * decompose IDIO into AVAR and HERF
+. generate AVAR = IDIO / HERF
+
 . 
 . * how many years in sample?
 . egen N = count(Fs1), by(country)
@@ -5055,9 +5058,9 @@ Country # 47
 . tempfile sm
 
 . save `sm', replace 
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02130.000001 no
+(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02168.000001 no
 > t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02130.000001 saved
+file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02168.000001 saved
 
 . 
 . 

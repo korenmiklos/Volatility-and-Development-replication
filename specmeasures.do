@@ -72,8 +72,10 @@ forval X = 1/$J {
 	replace COV = 2 * `BETAtmp' if country==`X'
 }
 
-gen RISK = GSECT + IDIO + CNT + COV
 * this is the overall risk
+gen RISK = GSECT + IDIO + CNT + COV
+* decompose IDIO into AVAR and HERF
+generate AVAR = IDIO / HERF
 
 * how many years in sample?
 egen N = count(Fs1), by(country)
