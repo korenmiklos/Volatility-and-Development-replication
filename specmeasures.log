@@ -3709,8 +3709,6 @@ end of do-file
 
 . 
 . 
-. 
-. 
 . * read in mean returns
 . use "data/derived/meanlaborprod_wide.dta", clear
 
@@ -3935,33 +3933,10 @@ r47  16.920893
   3. }
 
 . 
-. * min var portfolio
-. count
-  1,507
-
-. gen b0 = .
-(1,507 missing values generated)
-
-. gen b1 = .
-(1,507 missing values generated)
-
-. gen b2 = .
-(1,507 missing values generated)
-
-. gen m = .
-(1,507 missing values generated)
-
-. gen TAU2=.
-(1,507 missing values generated)
-
-. gen BETA=.
-(1,507 missing values generated)
-
-. 
 . forval Y=1/$S {
-  2.         matrix nicelittlevector=Varind["Fs`Y'",1..$S]
-  3.         matrix score SigmaFs`Y'=nicelittlevector
-  4.         replace SigmaFs`Y'=SigmaFs`Y'*Fs`Y'
+  2.         matrix nicelittlevector = Varind["Fs`Y'",1..$S]
+  3.         matrix score SigmaFs`Y' = nicelittlevector
+  4.         replace SigmaFs`Y' = SigmaFs`Y'*Fs`Y'
   5. }
 (1,507 real changes made)
 (1,507 real changes made)
@@ -3984,17 +3959,18 @@ r47  16.920893
 (1,507 real changes made)
 
 . forval Y=1/$S {
-  2.         gen sqFs`Y'=Fs`Y'^2
+  2.         gen sqFs`Y' = Fs`Y'^2
   3. }
 
-. egen SECT=rsum(SigmaFs1 - SigmaFs$S)
+. egen GSECT=rsum(SigmaFs1 - SigmaFs$S)
 
-. su SECT
+. su GSECT
 
     Variable |        Obs        Mean    Std. Dev.       Min        Max
 -------------+---------------------------------------------------------
-        SECT |      1,507    .0037045    .0004958   .0026052   .0062056
+       GSECT |      1,507    .0037045    .0004958   .0026052   .0062056
 
+. 
 . egen HERF=rsum(sqFs1 - sqFs$S)
 
 . su HERF
@@ -4907,389 +4883,167 @@ r47  16.920893
 (33 real changes made)
 
 . 
-. **this calculates the residual
-. matrix residual=J($S,1,0)
+. gen CNT = .
+(1,507 missing values generated)
 
-. matrix residual = dnsigma2 * J($J,1,1/$J)
+. gen COV = .
+(1,507 missing values generated)
 
 . forval X = 1/$J {
   2.     di in gre "Country # " in ye `X'
-  3.     matrix Omega = Varind + Covindcnt["Fc`X'","Fs1".."Fs$S"]' * J(1,$S,1) 
-> + J($S,1,1) * Covindcnt["Fc`X'","Fs1".."Fs$S"] + Varcnt[rownumb(Varcnt,"Fc`X'
-> "),colnumb(Varcnt,"Fc`X'")] * J($S,$S,1) + diag(dnsigma2[1..$S,`X'])
-  4.     matrix mu = Mu[`X',1..$S]
-  5. 
-. * this calcs current mean return using labor shares
-.     capture drop mtemp
-  6.     matrix score mtemp = mu
-  7.     replace m=mtemp if country==`X'
-  8. 
-.     matrix A = (mu*inv(Omega)*mu', J(1,$S,1) * inv(Omega) * mu' \ J(1,$S,1) *
->  inv(Omega)*mu' , J(1,$S,1) * inv(Omega) * J($S,1,1))
-  9.     matrix core = inv(A) 
- 10. * the previous formula was the same but longer
-.     replace b0 = core[2,2] if country==`X'
- 11.     replace b1 = core[2,1]+core[1,2] if country==`X'
- 12.     replace b2 = core[1,1] if country==`X'
- 13. 
-.         replace TAU2 = Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(Varcnt,"Fc`X'")
-> ] if country==`X'
- 14.         capture drop BETAtmp
- 15.         matrix nicelittlevector=Covindcnt["Fc`X'","Fs1".."Fs$S"]
- 16.         matrix score BETAtmp = nicelittlevector
- 17.         replace BETA = BETAtmp/TAU2 if country==`X'
- 18. 
-. }
+  3.         replace CNT = Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(Varcnt,"Fc`X'
+> ")] if country==`X'
+  4.         tempvar BETAtmp
+  5.         matrix nicelittlevector = Covindcnt["Fc`X'","Fs1".."Fs$S"]
+  6.         matrix score `BETAtmp' = nicelittlevector
+  7.         replace COV = 2 * `BETAtmp' if country==`X'
+  8. }
 Country # 1
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
 (30 real changes made)
 (30 real changes made)
 Country # 2
 (38 real changes made)
 (38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 Country # 3
-(28 real changes made)
-(28 real changes made)
-(28 real changes made)
-(28 real changes made)
 (28 real changes made)
 (28 real changes made)
 Country # 4
 (27 real changes made)
 (27 real changes made)
-(27 real changes made)
-(27 real changes made)
-(27 real changes made)
-(27 real changes made)
 Country # 5
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 6
 (25 real changes made)
 (25 real changes made)
-(25 real changes made)
-(25 real changes made)
-(25 real changes made)
-(25 real changes made)
 Country # 7
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 8
 (24 real changes made)
 (24 real changes made)
-(24 real changes made)
-(24 real changes made)
-(24 real changes made)
-(24 real changes made)
 Country # 9
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 10
 (29 real changes made)
 (29 real changes made)
-(29 real changes made)
-(29 real changes made)
-(29 real changes made)
-(29 real changes made)
 Country # 11
-(36 real changes made)
-(36 real changes made)
-(36 real changes made)
-(36 real changes made)
 (36 real changes made)
 (36 real changes made)
 Country # 12
 (20 real changes made)
 (20 real changes made)
-(20 real changes made)
-(20 real changes made)
-(20 real changes made)
-(20 real changes made)
 Country # 13
-(32 real changes made)
-(32 real changes made)
-(32 real changes made)
-(32 real changes made)
 (32 real changes made)
 (32 real changes made)
 Country # 14
 (33 real changes made)
 (33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
 Country # 15
-(23 real changes made)
-(23 real changes made)
-(23 real changes made)
-(23 real changes made)
 (23 real changes made)
 (23 real changes made)
 Country # 16
 (22 real changes made)
 (22 real changes made)
-(22 real changes made)
-(22 real changes made)
-(22 real changes made)
-(22 real changes made)
 Country # 17
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 18
 (25 real changes made)
 (25 real changes made)
-(25 real changes made)
-(25 real changes made)
-(25 real changes made)
-(25 real changes made)
 Country # 19
-(31 real changes made)
-(31 real changes made)
-(31 real changes made)
-(31 real changes made)
 (31 real changes made)
 (31 real changes made)
 Country # 20
 (38 real changes made)
 (38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 Country # 21
-(23 real changes made)
-(23 real changes made)
-(23 real changes made)
-(23 real changes made)
 (23 real changes made)
 (23 real changes made)
 Country # 22
 (30 real changes made)
 (30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
 Country # 23
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 24
 (33 real changes made)
 (33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
 Country # 25
-(34 real changes made)
-(34 real changes made)
-(34 real changes made)
-(34 real changes made)
 (34 real changes made)
 (34 real changes made)
 Country # 26
 (38 real changes made)
 (38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 Country # 27
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 28
 (33 real changes made)
 (33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
 Country # 29
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
 (33 real changes made)
 (33 real changes made)
 Country # 30
 (28 real changes made)
 (28 real changes made)
-(28 real changes made)
-(28 real changes made)
-(28 real changes made)
-(28 real changes made)
 Country # 31
-(21 real changes made)
-(21 real changes made)
-(21 real changes made)
-(21 real changes made)
 (21 real changes made)
 (21 real changes made)
 Country # 32
 (38 real changes made)
 (38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 Country # 33
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
 (30 real changes made)
 (30 real changes made)
 Country # 34
 (34 real changes made)
 (34 real changes made)
-(34 real changes made)
-(34 real changes made)
-(34 real changes made)
-(34 real changes made)
 Country # 35
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
 (30 real changes made)
 (30 real changes made)
 Country # 36
 (30 real changes made)
 (30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
 Country # 37
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 38
 (34 real changes made)
 (34 real changes made)
-(34 real changes made)
-(34 real changes made)
-(34 real changes made)
-(34 real changes made)
 Country # 39
-(37 real changes made)
-(37 real changes made)
-(37 real changes made)
-(37 real changes made)
 (37 real changes made)
 (37 real changes made)
 Country # 40
 (38 real changes made)
 (38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 Country # 41
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 (38 real changes made)
 (38 real changes made)
 Country # 42
 (38 real changes made)
 (38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
-(38 real changes made)
 Country # 43
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
 (33 real changes made)
 (33 real changes made)
 Country # 44
 (31 real changes made)
 (31 real changes made)
-(31 real changes made)
-(31 real changes made)
-(31 real changes made)
-(31 real changes made)
 Country # 45
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
 (33 real changes made)
 (33 real changes made)
 Country # 46
 (30 real changes made)
 (30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
-(30 real changes made)
 Country # 47
 (33 real changes made)
 (33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
-(33 real changes made)
 
 . 
-. gen V = b0+b1*m+b2*m^2
+. gen RISK = GSECT + IDIO + CNT + COV
 
-. * this is the lowest risk for the given mean
-. 
-. gen RISK = SECT + IDIO + 2*BETA*TAU2 + TAU2
-
-. * this is the overall 
-. 
-. gen COV2 = 2*BETA*TAU2
-
-. 
-. gen MIN = b0-b1^2/(4*b2)
-
-. * this is the absolute lowest risk
-. 
-. gen minM = -b1/(2*b2)
-
-. * this is the corresponding mean
-. 
+. * this is the overall risk
 . 
 . * how many years in sample?
 . egen N = count(Fs1), by(country)
@@ -5301,9 +5055,9 @@ Country # 47
 . tempfile sm
 
 . save `sm', replace 
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02048.000001 no
+(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02130.000001 no
 > t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02048.000001 saved
+file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02130.000001 saved
 
 . 
 . 
@@ -5317,7 +5071,7 @@ file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St02048.000001 saved
 . merge cnum year using `sm'
 (note: you are using old merge syntax; see [D] merge for new syntax)
 
-. drop _
+. drop _*
 
 . sort cnum year
 

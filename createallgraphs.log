@@ -37,17 +37,15 @@ Notes:
 . 
 . rename COV Sector_Country_Covariance
 
-. rename SECT Sectoral_Risk
+. rename GSECT Sectoral_Risk
 
 . rename HERF Herfindahl
 
 . rename IDIO Idiosyncratic_Risk
 
-. rename TAU2 Country_Risk
+. rename CNT Country_Risk
 
 . rename RISK Overall_risk
-
-. rename BETA Sector_Country_Beta
 
 . 
 . label var loggdp "Log Real GDP per capita (PPP)"
@@ -63,14 +61,12 @@ Notes:
 
 . label var Overall_risk "Overall Risk"
 
-. label var Sector_Country_Beta "Sector-Country Beta"
-
 . label var Sector_Country_Covariance "Sector-Country Covariance"
 
 . 
 . 
 . foreach X of varlist  Herfindahl Idiosyncratic_Risk Sectoral_Risk Sector_Coun
-> try_Beta {
+> try_Covariance {
   2.         do drawgraphs `X' loggdp
   3. }
 
@@ -312,7 +308,7 @@ end of do-file
 
     Variable |        Obs        Mean    Std. Dev.       Min        Max
 -------------+---------------------------------------------------------
-Sector_Cou~a |      1,507   -.0540536    .2206908  -.7254856    .546814
+Sector_Cou~e |      1,507   -.0000518    .0081577  -.0206801   .0443218
 
 . if (r(min) > 0) {
 .         generate `y1' = ln(`1')
@@ -333,7 +329,8 @@ Sector_Cou~a |      1,507   -.0540536    .2206908  -.7254856    .546814
 > al) plotregion(ilwidth(medthin))
 
 . graph export "graphs/lowess_`1'_`2'.eps", replace
-(file graphs/lowess_Sector_Country_Beta_loggdp.eps written in EPS format)
+(note: file graphs/lowess_Sector_Country_Covariance_loggdp.eps not found)
+(file graphs/lowess_Sector_Country_Covariance_loggdp.eps written in EPS format)
 
 . 
 . xtreg `y1' `2', i(country) fe
@@ -342,24 +339,24 @@ Fixed-effects (within) regression               Number of obs     =      1,427
 Group variable: country                         Number of groups  =         45
 
 R-sq:                                           Obs per group:
-     within  = 0.0364                                         min =         20
-     between = 0.0077                                         avg =       31.7
-     overall = 0.0028                                         max =         37
+     within  = 0.0019                                         min =         20
+     between = 0.0083                                         avg =       31.7
+     overall = 0.0002                                         max =         37
 
-                                                F(1,1381)         =      52.21
-corr(u_i, Xb)  = -0.0766                        Prob > F          =     0.0000
+                                                F(1,1381)         =       2.57
+corr(u_i, Xb)  = -0.0275                        Prob > F          =     0.1093
 
 ------------------------------------------------------------------------------
     __000000 |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
-      loggdp |   .0060261    .000834     7.23   0.000     .0043902    .0076621
-       _cons |  -.1114811   .0073751   -15.12   0.000    -.1259487   -.0970134
+      loggdp |    .000127   .0000792     1.60   0.109    -.0000285    .0002824
+       _cons |  -.0012659   .0007008    -1.81   0.071    -.0026407    .0001089
 -------------+----------------------------------------------------------------
-     sigma_u |   .2199185
-     sigma_e |  .00870004
-         rho |  .99843743   (fraction of variance due to u_i)
+     sigma_u |  .00939441
+     sigma_e |   .0008267
+         rho |  .99231559   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
-F test that all u_i=0: F(44, 1381) = 21079.88                Prob > F = 0.0000
+F test that all u_i=0: F(44, 1381) = 3220.66                 Prob > F = 0.0000
 
 . predict `u', u
 (6,882 missing values generated)
@@ -372,7 +369,8 @@ F test that all u_i=0: F(44, 1381) = 21079.88                Prob > F = 0.0000
 > al) plotregion(ilwidth(medthin))
 
 . graph export "graphs/within_`1'_`2'.eps", replace
-(file graphs/within_Sector_Country_Beta_loggdp.eps written in EPS format)
+(note: file graphs/within_Sector_Country_Covariance_loggdp.eps not found)
+(file graphs/within_Sector_Country_Covariance_loggdp.eps written in EPS format)
 
 . 
 . 
@@ -384,6 +382,5 @@ end of do-file
 . graph export "graphs/lowess_Country_Risk_loggdp.eps",  replace
 (file graphs/lowess_Country_Risk_loggdp.eps written in EPS format)
 
-. 
 . 
 end of do-file
