@@ -158,6 +158,3 @@ reshape wide shock, i(year) j(cntsec)
 log close
 set more on
 
-************
-gen temp=cpi if country==840
-egen cpiUSA=mean(temp), by(year)

@@ -236,8 +236,8 @@ replace worldminv=minminV if (m<minminM)
 
 save minimumvariance, replace
 
-table cname, c(m SECT m HERF m dnHERF m TAU2 m BETA m RISK m MIN)
-table cname, c(m m m RISK m ownV m minV m DIST1 m DIST2)
+table cname, c(m SECT m HERF m dnHERF)
+table cname, c(m TAU2 m BETA m RISK)
 
 *******************************************
 * finally lets do some ML tests

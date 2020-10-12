@@ -1,7 +1,9 @@
------------------------------------------------------------------------------------------------------------------------------------------------------------
-       log:  C:\P1-Div\these are the spec measures oct 28.log
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/koren/Tresorit/projects/published/voldev/replication/these 
+> are the spec measures oct 28.log
   log type:  text
- opened on:   3 Feb 2006, 15:16:07
+ opened on:  12 Oct 2020, 08:38:10
 
 . 
 . * prelims
@@ -16,10 +18,2350 @@
 . 
 . * estimate pairwise covariances 
 . matrix S = J($S+$J,$S+$J,0)
-+ not found
-r(111);
 
-end of do-file
-r(111);
+. matname S Fc1-Fc$J Fs1 Fs2-Fs$S, rows(.)
 
-. exit, clear
+. matname S Fc1-Fc$J Fs1 Fs2-Fs$S, col(.)
+
+. 
+. foreach X of varlist Fc1-Fc$J Fs1 Fs2-Fs$S {
+  2.     foreach Y of varlist Fc1-Fc$J Fs1 Fs2-Fs$S {
+  3.         capture matrix accum Spair = `X' `Y', nocons
+  4.         capture matrix S[rownumb(S,"`X'"),colnumb(S,"`Y'")] = Spair[2,1]/r
+> (N)
+  5.     }
+  6. }
+
+. 
+. 
+. matrix Varcnt = S["Fc1".."Fc$J","Fc1".."Fc$J"]
+
+. matrix Varind = S["Fs1".."Fs$S","Fs1".."Fs$S"]
+
+. matrix Covindcnt = S["Fc1".."Fc$J","Fs1".."Fs$S"]
+
+. 
+. 
+. 
+. 
+. * read in mean returns
+. use meanlaborprod_wide30, clear
+
+. 
+. sort country
+
+. 
+. * rename vars to be compatible with shares
+. foreach X of num 1/$S {
+  2.     ren laborprod`X' Fs`X'
+  3. }
+
+. 
+. mkmat Fs1-Fs$S, mat(Mu)
+
+. mat list Mu
+
+Mu[47,19]
+           Fs1        Fs2        Fs3        Fs4        Fs5        Fs6
+ r1  24.870768  18.470222  13.082125  16.884527  14.273502   19.03429
+ r2  38.429703  18.039019  12.766585  13.793095   13.95016  22.746492
+ r3  14.280751   3.171845  2.4940381  11.604652  14.899443  5.8185081
+ r4  46.871071  13.277896  10.890178  13.864508  21.441122  13.366463
+ r5  46.096115  26.858929  19.342037  21.726074  19.401888  33.043533
+ r6  20.580612  5.8189836  5.1633282  7.1234999  10.023857   5.713583
+ r7  49.036194  21.145618  19.716158  27.132032  20.477644  22.890368
+ r8  35.892014  13.132525  16.011438  11.226423  10.503091  9.7581415
+ r9  45.890873  23.622725  10.365823  16.115528  12.398442  17.827314
+r10  25.020586  17.361349  11.882432  14.158737  15.116966  16.482517
+r11  23.513575  14.753663  7.0981393  10.227284  9.1055899  13.011539
+r12  30.973429  20.057131  9.6082764  14.673162  15.826439  11.756345
+r13  23.334824  14.816411   11.42906  12.814546   11.55078  16.849432
+r14  31.217258  16.255346  17.011642  22.750624  13.477417  20.061718
+r15  55.051418  23.102579  18.540136  22.135965  18.466736  28.385969
+r16  16.266638  4.2754164  3.1192882  2.8715613  2.6497962    3.45944
+r17  25.957733  18.465164  10.952391  15.936399    12.6717    17.9044
+r18  35.860851  17.875626   12.89547  18.028692  10.947444  16.657873
+r19  14.160911  9.4229183  8.0344534  9.7057352  7.4103489  13.221334
+r20  5.0586486  5.2953954  6.1337919  5.6769681  5.4203553  3.7176387
+r21  13.598538  8.6483564  5.7659035  9.4202013  9.5142107  11.710511
+r22  13.570659  7.8908277  9.1855984   10.83775  10.994282  8.4710064
+r23  51.354137  17.918995  11.686171   17.64167  12.882634  21.481209
+r24  18.791698  16.779314   9.500905  14.109435  14.177647   16.49041
+r25   40.00436  28.520014  20.975683  29.125294  20.396633  28.253973
+r26  32.990944  21.570019   12.93906  23.363979  21.362164  23.137461
+r27   51.99749  22.612602  15.724691  25.851984  16.519085  23.365746
+r28  26.663265  15.667382  7.4103117  8.4042492  8.5142469  11.586555
+r29  42.057331  24.378773  16.883049  21.036015   18.14514  24.484743
+r30  16.981947  13.582618  8.9856529  13.605066   10.92489  15.946074
+r31  61.384167  23.530617  17.038305  68.582504  33.415325  33.900398
+r32  22.761431  15.955602  13.368603  14.742164  13.410634  19.122446
+r33   26.71784  7.5252385  9.0151911  15.855211  7.7327766  7.1395998
+r34   29.66116  9.7689295  6.3650341  5.9978981  5.2767982  8.3478336
+r35  21.020435  10.036256  7.0526924  9.1164789  6.7332792   11.20007
+r36  20.178314  12.314537  8.9276237  15.293518  9.4759645  12.146565
+r37  29.533161  15.241582  8.3754539  13.391461  10.561315  16.156368
+r38  23.415396  15.334602  8.9034729  14.240536  12.574817  9.2555208
+r39  27.612904  15.150137  7.8037558  10.428366  15.115865  11.585716
+r40  28.092262  18.984486  15.247912  20.951122  15.614044  17.781204
+r41  29.677601  20.419819  14.801309  20.474773  15.946712  25.701006
+r42  33.217278  21.277298  17.454443  18.064331  15.727975  19.381018
+r43  9.1668835  5.6524048  5.5737538  5.7156596  6.7783709  6.0867968
+r44  33.545807  18.849508  13.934702   19.00495  17.079029  23.823496
+r45  57.887642  24.932245  19.003986  25.334641   20.66048  26.919065
+r46  30.060055  21.309639   10.50915  29.043549   9.617897  10.381422
+r47  33.784306  19.075989  12.017662   15.52409  10.881466  11.259237
+
+           Fs7        Fs8        Fs9       Fs10       Fs11       Fs12
+ r1  15.533144  28.210356  21.763361  39.907768   23.18454  22.063169
+ r2  19.458458  30.064816  25.169968  32.698326  26.598068  22.148367
+ r3  3.7514551  8.3852453  4.8027897  17.868303  4.9946995  5.3410754
+ r4  7.4856763  15.610869  19.875195  201.11038   16.37818  18.871889
+ r5  25.263103  51.986347  32.866417   70.01786  40.695831  31.477337
+ r6  2.5945523  11.532159  6.3720512  25.952837  10.097081  8.8032913
+ r7  19.031404  92.987534  44.058342  96.879539  41.571136  28.746534
+ r8  16.180182  18.744114  13.279297  52.163464  11.735803  12.138063
+ r9  9.7727118   48.20842   22.92753  62.620815  35.249374  23.543028
+r10  15.589216  23.452023  20.842077  35.671879  18.186155  19.840717
+r11  9.6565399  23.809319   16.52902  93.298294  28.033073  18.690699
+r12  11.547406  29.776442  21.840784  50.491474  15.730453  16.734951
+r13  14.688685  31.874952  21.525087  36.123222  17.840288   19.51107
+r14   20.73424   25.38295  25.507198  54.292309  16.864126  23.521397
+r15  28.365812  34.710098  27.609215  53.702503  29.747658  27.729338
+r16  2.5611203  6.4288139  2.8775206     17.431  6.4738688  5.7471542
+r17  11.848493  25.431463  21.132032  41.987976  31.799793  24.432501
+r18  15.725246  19.420336  23.022182  29.975328  16.330959  17.232634
+r19  10.659136  22.786398  20.312496  42.470497  19.576612  22.148375
+r20  3.7053289  8.3296814  7.4366946  21.598763  11.898669  8.0350409
+r21  4.8198085  19.900175  11.961381  26.756178   10.57436  7.6003857
+r22  9.5957193  13.974597  11.868757  18.512186  11.780313   9.748106
+r23  16.113386  28.948849  38.062546  138.97659  28.852041  28.629801
+r24   14.60613  24.571035  20.100517  39.824997  21.625511   28.42588
+r25  26.985432  40.042419  41.769875  53.273228  34.391064  34.201351
+r26  24.918871  40.025299  40.459988  97.367325  36.098957  32.720997
+r27  21.690962  37.730289  31.419971  77.989594  27.946169  30.017601
+r28  9.2819481   18.11647  21.889725  83.375458  18.857435  14.383459
+r29  21.031368  33.740746  30.515526  47.607025  27.833765  29.684908
+r30  13.492854  25.410246  17.509657  26.036045   17.88682  18.507706
+r31  39.600193  29.672367  26.046904  64.484085  27.187725  48.175102
+r32  17.729832  27.671423  19.329639  39.215347  20.397894  21.418489
+r33  6.0046654  12.751176  11.425463  33.274487  10.178323  9.7723303
+r34   5.565239  27.128998  12.209653   81.65213  15.197523  13.268068
+r35  10.662013  16.189648  10.864495  34.500504  18.564667  14.428666
+r36  9.1736536  38.203369  19.206335  65.463333    19.4291  18.349644
+r37  11.879184  26.772058  26.021582  90.700539  19.432461  16.061375
+r38  11.976448   34.47599  25.369556  44.274078   28.44899  22.103115
+r39  9.5136366   21.25239  22.911974  38.850903  27.256155  19.704903
+r40  16.122761  32.856262   28.36087  49.932747  29.572815   25.64452
+r41  20.857485  36.565266  27.594301  49.115051   22.92997  23.400099
+r42  21.213064  30.437387  43.155262  142.86063  49.369289  29.347811
+r43  6.2994714  10.492385  9.8442345     20.177  10.177926  10.198777
+r44  23.456324  30.778666  34.606075  54.097279  27.775072  27.177141
+r45  23.818821  51.698284  39.006752  96.384239  39.507969  33.934441
+r46  10.763603  30.447895  20.043882  76.243477  26.091295  21.028807
+r47  11.228502  31.916643  21.307608  123.29604  33.659134  19.662251
+
+          Fs13       Fs14       Fs15       Fs16       Fs17       Fs18
+ r1  28.687277  31.889879  19.599228   19.85129  20.856544  20.344416
+ r2  29.570719  25.326962  24.547983  26.075932  28.748549  17.614925
+ r3  8.8776178  12.541887  4.5088921  13.309958  10.190925  2.5848279
+ r4  29.021168  46.150253  17.100073  18.604193  12.546166  15.220844
+ r5  43.817825  49.006397  34.815868  41.005753  50.708855  34.375072
+ r6  8.2748203  17.515665  9.1009989  15.186253  9.6903801  3.7586694
+ r7  49.338284  159.81583  25.863722  44.541134  34.403347  28.397469
+ r8  18.316191   33.18045  12.071171  15.558537  24.186874  15.090201
+ r9  32.955914  44.619209  18.942919  27.623205  28.799381  28.713999
+r10  24.043787  21.841625  18.250637  18.868464  17.556686  19.877645
+r11  29.757568  33.386662  16.853392   22.60372  20.903431  17.838022
+r12  27.767611  19.172482  15.700733   33.24366  14.890719  23.217348
+r13  21.378416  27.331974  19.705599   20.55789   17.29022  21.459969
+r14  30.588614  23.188477  24.179647   23.50741  21.361546  25.162226
+r15  35.033535  31.909779  30.224922  31.647257  34.289867   27.54541
+r16  6.2709665  20.483232   5.268424   6.507175  4.3764057  4.2457108
+r17  26.024792  42.762005  18.843546  26.503399  17.142693  16.228773
+r18  29.998634  29.920294  19.392906   21.56834  23.650095  17.658379
+r19  15.333892  16.799559  14.269324  17.199474  18.452383  17.052698
+r20   6.779614  12.972183  9.3680334  13.719576  8.9407902  9.2069902
+r21  13.817329  86.381256    15.7287   18.94499  33.939037  7.8608899
+r22  10.964128  14.449492  12.272963  13.489315  17.095438  10.984233
+r23  38.226067  29.488579  53.966461  52.012802  20.179054  46.862732
+r24  27.589767  27.592577  21.500349  28.874958  24.508831  24.500692
+r25  35.675335  37.508091  34.042568  33.134079  30.066452  35.623329
+r26  39.132961  56.480099  37.005024  34.707684  45.955906  29.785851
+r27   40.27972  60.911114  28.979486  40.057457  40.271252  23.767879
+r28  25.880171  28.753704  19.619005  19.748865   26.57929  13.442203
+r29  32.897827  35.812653  26.511602  31.346697  24.013609  28.311453
+r30  20.808714  26.474447  16.141146  14.736274   15.58149  13.667378
+r31  34.193871   20.33012  41.470303  25.349695  21.011681  27.945295
+r32  25.925089   34.04401  21.356255   24.68154  20.245522  24.730478
+r33  22.159021  11.844258   8.133709  15.146021  11.528377  5.5975094
+r34  21.514597  36.836746  11.583063  18.354897  24.731413  9.3588362
+r35  9.7399263  16.863567  11.367435  14.397964  14.328455  13.779675
+r36  19.841137  19.958326  15.503778  22.187918  21.092426  15.784956
+r37   32.64262  40.086292  30.739098  27.973715  25.975853  25.699993
+r38  20.741875  47.655434  22.650785  20.658268  27.876278  31.075848
+r39   17.53648  23.548002  15.671171  19.466757   20.33654  27.671627
+r40  27.870333   34.14185  23.308422   28.08145  29.211693  25.223122
+r41  27.765215  28.815615  25.363054  26.846827  26.041285  27.675117
+r42  36.826546  42.446781  29.604807  41.968231  36.067722  26.635941
+r43  10.884819  9.8203268  9.8085499  15.098878  9.3141308     8.2142
+r44  32.465645  29.931419  27.538353  26.638725  29.045012  25.834366
+r45  40.370979  43.923813  39.044186  42.470081  49.016193   49.42384
+r46  21.060894  37.195858  17.819809  23.445417  35.117573  24.103922
+r47  26.181408  43.618912  20.594122  26.622225  36.268711  26.348684
+
+          Fs19
+ r1  16.992329
+ r2  19.673815
+ r3  8.5783167
+ r4  25.881433
+ r5  26.966377
+ r6  9.1400967
+ r7  22.827208
+ r8  15.248446
+ r9  19.991262
+r10  21.776321
+r11  10.881678
+r12  15.150805
+r13  16.845486
+r14  20.876673
+r15  26.464806
+r16  3.3516028
+r17  14.917039
+r18  17.706583
+r19  10.452194
+r20  9.5341187
+r21  6.4092879
+r22  11.948188
+r23  23.600386
+r24  16.345757
+r25  27.803579
+r26  30.021648
+r27  19.233065
+r28  10.783399
+r29  27.941517
+r30  15.101454
+r31  41.722473
+r32  16.732214
+r33  7.7132354
+r34   8.143054
+r35  9.0058718
+r36  12.473583
+r37  14.670257
+r38  28.145094
+r39  11.082946
+r40  21.020868
+r41  22.110991
+r42  21.716234
+r43  8.5714998
+r44  22.277842
+r45  30.594412
+r46  14.843366
+r47  16.920893
+
+. 
+. * read in labor shares
+. use preparedshares30, clear
+
+. 
+. foreach X of num 1/$S {
+  2.     ren share`X' Fs`X'
+  3. }
+
+. 
+. * min var portfolio
+. count
+  1,507
+
+. gen b0 = .
+(1,507 missing values generated)
+
+. gen b1 = .
+(1,507 missing values generated)
+
+. gen b2 = .
+(1,507 missing values generated)
+
+. gen m = .
+(1,507 missing values generated)
+
+. gen TAU2=.
+(1,507 missing values generated)
+
+. gen BETA=.
+(1,507 missing values generated)
+
+. 
+. forval Y=1/$S {
+  2.         matrix nicelittlevector=Varind["Fs`Y'",1..$S]
+  3.         matrix score SigmaFs`Y'=nicelittlevector
+  4.         replace SigmaFs`Y'=SigmaFs`Y'*Fs`Y'
+  5. }
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+(1,507 real changes made)
+
+. forval Y=1/$S {
+  2.         gen sqFs`Y'=Fs`Y'^2
+  3. }
+
+. egen SECT=rsum(SigmaFs1 - SigmaFs$S)
+
+. su SECT
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        SECT |      1,507    .0037045    .0004958   .0026052   .0062056
+
+. egen HERF=rsum(sqFs1 - sqFs$S)
+
+. replace HERF=HERF*sigma2
+(1,507 real changes made)
+
+. su HERF
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        HERF |      1,507    .0079132    .0035759   .0050257    .035696
+
+. 
+. * del Negro's HERF is dnHERF
+. * this is a weighted sum of squares
+. gen dnHERF=0
+
+. forval s = 1/$S {
+  2.         forval j = 1/$J {
+  3.                 replace dnHERF = dnHERF+sqFs`s'*dnsigma2[`s',`j'] if count
+> ry==`j'
+  4.         }
+  5. }
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+(30 real changes made)
+(38 real changes made)
+(28 real changes made)
+(27 real changes made)
+(38 real changes made)
+(25 real changes made)
+(38 real changes made)
+(24 real changes made)
+(38 real changes made)
+(29 real changes made)
+(36 real changes made)
+(20 real changes made)
+(32 real changes made)
+(33 real changes made)
+(23 real changes made)
+(22 real changes made)
+(38 real changes made)
+(25 real changes made)
+(31 real changes made)
+(38 real changes made)
+(23 real changes made)
+(30 real changes made)
+(38 real changes made)
+(33 real changes made)
+(34 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(33 real changes made)
+(28 real changes made)
+(21 real changes made)
+(38 real changes made)
+(30 real changes made)
+(34 real changes made)
+(30 real changes made)
+(30 real changes made)
+(38 real changes made)
+(34 real changes made)
+(37 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(33 real changes made)
+(31 real changes made)
+(33 real changes made)
+(30 real changes made)
+(33 real changes made)
+
+. 
+. **this calculates the residual
+. matrix residual=J($S,1,0)
+
+. matrix residual = dnsigma2 * J($J,1,1/$J)
+
+. forval X = 1/$J {
+  2.     di in gre "Country # " in ye `X'
+  3. ********* have to change omega here if we want to use dnHERF
+. * this is the old one, just in case
+. *    matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1
+> ,1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(
+> Varcnt,"Fc`X'")]*J($S,$S,1)+sigma2*I($S)
+. * and here comes the new one
+.     matrix Omega = Varind+Covindcnt["Fc`X'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1,
+> 1)*Covindcnt["Fc`X'","Fs1".."Fs$S"]+ Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(V
+> arcnt,"Fc`X'")]*J($S,$S,1)+diag(dnsigma2[1..$S,`X'])
+  4.     matrix mu = Mu[`X',1..$S]
+  5. 
+. 
+. 
+. * this calcs current mean return using labor shares
+.     capture drop mtemp
+  6.     matrix score mtemp = mu
+  7.     replace m=mtemp if country==`X'
+  8. 
+.     matrix A = (mu*inv(Omega)*mu', J(1,$S,1)*inv(Omega)*mu' \ J(1,$S,1)*inv(O
+> mega)*mu' , J(1,$S,1)*inv(Omega)*J($S,1,1))
+  9.     matrix core = inv(A) 
+ 10. * the previous formula was the same but longer
+.     replace b0 = core[2,2] if country==`X'
+ 11.     replace b1 = core[2,1]+core[1,2] if country==`X'
+ 12.     replace b2 = core[1,1] if country==`X'
+ 13. 
+.         replace TAU2 = Varcnt[rownumb(Varcnt,"Fc`X'"),colnumb(Varcnt,"Fc`X'")
+> ] if country==`X'
+ 14.         capture drop BETAtmp
+ 15.         matrix nicelittlevector=Covindcnt["Fc`X'","Fs1".."Fs$S"]
+ 16.         matrix score BETAtmp = nicelittlevector
+ 17.         replace BETA = BETAtmp/TAU2 if country==`X'
+ 18. 
+. }
+Country # 1
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+Country # 2
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 3
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+Country # 4
+(27 real changes made)
+(27 real changes made)
+(27 real changes made)
+(27 real changes made)
+(27 real changes made)
+(27 real changes made)
+Country # 5
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 6
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+Country # 7
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 8
+(24 real changes made)
+(24 real changes made)
+(24 real changes made)
+(24 real changes made)
+(24 real changes made)
+(24 real changes made)
+Country # 9
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 10
+(29 real changes made)
+(29 real changes made)
+(29 real changes made)
+(29 real changes made)
+(29 real changes made)
+(29 real changes made)
+Country # 11
+(36 real changes made)
+(36 real changes made)
+(36 real changes made)
+(36 real changes made)
+(36 real changes made)
+(36 real changes made)
+Country # 12
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+(20 real changes made)
+Country # 13
+(32 real changes made)
+(32 real changes made)
+(32 real changes made)
+(32 real changes made)
+(32 real changes made)
+(32 real changes made)
+Country # 14
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+Country # 15
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+Country # 16
+(22 real changes made)
+(22 real changes made)
+(22 real changes made)
+(22 real changes made)
+(22 real changes made)
+(22 real changes made)
+Country # 17
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 18
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+(25 real changes made)
+Country # 19
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+Country # 20
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 21
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+(23 real changes made)
+Country # 22
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+Country # 23
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 24
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+Country # 25
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+Country # 26
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 27
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 28
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+Country # 29
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+Country # 30
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+(28 real changes made)
+Country # 31
+(21 real changes made)
+(21 real changes made)
+(21 real changes made)
+(21 real changes made)
+(21 real changes made)
+(21 real changes made)
+Country # 32
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 33
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+Country # 34
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+Country # 35
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+Country # 36
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+Country # 37
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 38
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+(34 real changes made)
+Country # 39
+(37 real changes made)
+(37 real changes made)
+(37 real changes made)
+(37 real changes made)
+(37 real changes made)
+(37 real changes made)
+Country # 40
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 41
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 42
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+(38 real changes made)
+Country # 43
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+Country # 44
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+(31 real changes made)
+Country # 45
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+Country # 46
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+(30 real changes made)
+Country # 47
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+(33 real changes made)
+
+. 
+. gen V = b0+b1*m+b2*m^2
+
+. * this is the lowest risk for the given mean
+. 
+. gen RISK = SECT+HERF+2*BETA*TAU2+TAU2
+
+. gen dnRISK = SECT+dnHERF+2*BETA*TAU2+TAU2
+
+. * this is the overall 
+. 
+. gen COV2 = 2*BETA*TAU2
+
+. 
+. gen MIN = b0-b1^2/(4*b2)
+
+. * this is the absolute lowest risk
+. 
+. gen minM = -b1/(2*b2)
+
+. * this is the corresponding mean
+. 
+. 
+. * how many years in sample?
+. egen N = count(Fs1), by(country)
+
+. 
+. sort cnum year
+
+. save specmeasures30, replace 
+file specmeasures30.dta saved
+
+. 
+. 
+. * now merge with stuff
+. use $DIR/wdinew, clear
+
+. keep cnum cname year rgdppcp pop 
+
+. sort cnum year
+
+. merge cnum year using specmeasures30
+(note: you are using old merge syntax; see [D] merge for new syntax)
+
+. drop _
+
+. sort cnum year
+
+. save specmeasures30, replace
+file specmeasures30.dta saved
+
+. 
+. * do the world frontier
+. keep cnum year m b0 b1 b2 V MIN minM
+
+. sort cnum year
+
+. save meanlaborprod, replace
+file meanlaborprod.dta saved
+
+. 
+. collapse (mean) b0 b1 b2, by(cnum)
+
+. gen one=1
+
+. ren b0 b0_
+
+. ren b1 b1_
+
+. ren b2 b2_
+
+. 
+. drop if cnum==.
+(0 observations deleted)
+
+. 
+. reshape wide b0_ b1_ b2_, i(one) j(cnum)
+(note: j = 4 8 12 24 31 32 36 40 44 48 50 51 52 56 60 64 68 70 72 76 100 108 11
+> 6 120 124 132 140 144 148 152 156 158 170 178 180 188 191 192 196 203 204 208
+>  214 218 222 226 230 231 242 246 250 266 270 276 280 288 300 308 320 328 332 
+> 340 344 348 352 356 360 364 368 372 376 380 384 388 392 400 404 410 414 418 4
+> 22 426 428 430 438 440 442 446 450 454 458 466 470 478 480 484 496 504 508 51
+> 6 524 528 530 554 558 566 578 586 600 604 608 616 620 630 634 642 643 646 662
+>  670 682 686 702 703 705 706 710 716 724 736 740 748 752 756 760 764 768 776 
+> 780 784 788 792 800 818 826 834 840 854 858 862 886 890 894 901 902 904 905 9
+> 08 909 910 911 912 913 914 915 917 918 919 920 921 923 924 926 927 928 929 93
+> 0 931 932 934 935 936 937 938 939 940 942 943 944 946 947 948 949 950 952 956
+>  957 958 959 960 961 962 963 964 965 966 967 968)
+
+Data                               long   ->   wide
+-----------------------------------------------------------------------------
+Number of obs.                      208   ->       1
+Number of variables                   5   ->     625
+j variable (208 values)            cnum   ->   (dropped)
+xij variables:
+                                    b0_   ->   b0_4 b0_8 ... b0_968
+                                    b1_   ->   b1_4 b1_8 ... b1_968
+                                    b2_   ->   b2_4 b2_8 ... b2_968
+-----------------------------------------------------------------------------
+
+. sort one
+
+. save coefs_wide, replace
+file coefs_wide.dta saved
+
+. 
+. use meanlaborprod, clear
+
+. drop b0 b1 b2
+
+. ren V ownV
+
+. 
+. keep if ownV<.
+(6,802 observations deleted)
+
+. 
+. gen one=1
+
+. sort one
+
+. merge one using coefs_wide
+(note: you are using old merge syntax; see [D] merge for new syntax)
+variable one does not uniquely identify observations in the master data
+
+. tab _
+
+     _merge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          3 |      1,507      100.00      100.00
+------------+-----------------------------------
+      Total |      1,507      100.00
+
+. keep if _==3
+(0 observations deleted)
+
+. drop _
+
+. 
+. su cnum
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        cnum |      1,507    441.8792    248.7666         36        862
+
+. global mincnum r(min)
+
+. global maxcnum r(max)
+
+. 
+. * simply skip nonexistent countries 
+. forval i = 4/968 {
+  2.     capture gen V`i' = b0_`i'+b1_`i'*m+b2_`i'*m^2
+  3. }
+
+. 
+. egen numV=robs(ownV V*)
+
+. egen minV=rmin(ownV V*)
+
+. 
+. **************************** this is new 12/19  *****************************
+> ****
+. **************************** this is new 12/19  *****************************
+> ****
+. **************************** this is new 12/19  *****************************
+> ****
+. * the lowest variance in the world
+. egen minminV=min(MIN)
+
+. * has the following mean
+. su minM if MIN<=minminV
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+        minM |         33    34.35616           0   34.35616   34.35616
+
+. scalar minminM = r(min)
+
+. gen minminM=minminM
+
+. 
+. keep cnum  year m ownV minV numV minM MIN minminV minminM
+
+. sort cnum year
+
+. 
+. sort cnum year
+
+. merge cnum year using $DIR/pwt1
+(note: you are using old merge syntax; see [D] merge for new syntax)
+
+. tab _
+
+     _merge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         69        1.18        1.18
+          2 |      4,322       74.15       75.33
+          3 |      1,438       24.67      100.00
+------------+-----------------------------------
+      Total |      5,829      100.00
+
+. drop _
+
+. 
+. sort cnum year
+
+. merge cnum year using specmeasures30
+(note: you are using old merge syntax; see [D] merge for new syntax)
+
+. tab _
+
+     _merge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          2 |      2,480       29.85       29.85
+          3 |      5,829       70.15      100.00
+------------+-----------------------------------
+      Total |      8,309      100.00
+
+. drop _
+
+. 
+. 
+. gen DIST1 = dnRISK-ownV
+(6,802 missing values generated)
+
+. gen DIST2 = ownV-minV
+(6,802 missing values generated)
+
+. 
+. **************************** this is new 12/19  *****************************
+> ****
+. **************************** this is new 12/19  *****************************
+> ****
+. **************************** this is new 12/19  *****************************
+> ****
+. * if mean is lower than cnt vertex, calc dist to vertex
+. replace DIST1 = dnRISK-MIN if m<minM
+(319 real changes made)
+
+. 
+. 
+. * if mean is lower than world vertex but higher than cnt vertex, calc dist to
+>  world vertex
+. replace DIST2 = ownV-minminV if (m>=minM)&(m<minminM)
+(853 real changes made)
+
+. * calc dist of two vertices if both are above mean
+. replace DIST2 = minV-minminV if (m<minM)&(m<minminM)
+(319 real changes made)
+
+. 
+. ********correct minV!!!
+. gen ownminv=ownV
+(6,802 missing values generated)
+
+. replace ownminv=MIN if (m<minM)
+(319 real changes made)
+
+. 
+. gen worldminv=minV
+(6,802 missing values generated)
+
+. replace worldminv=minminV if (m<minminM)
+(1,172 real changes made)
+
+. 
+. save minimumvariance, replace
+file minimumvariance.dta saved
+
+. 
+. table cname, c(m SECT m HERF m dnHERF)
+
+-------------------------------------------------------------------------
+                  country name |   mean(SECT)    mean(HERF)  mean(dnHERF)
+-------------------------------+-----------------------------------------
+                   Afghanistan |                                         
+                       Albania |                                         
+                       Algeria |                                         
+                American Samoa |                                         
+                       Andorra |                                         
+                        Angola |                                         
+           Antigua and Barbuda |                                         
+                     Argentina |                                         
+                       Armenia |                                         
+                         Aruba |                                         
+                     Australia |     .0036426      .0059444      .0006045
+                       Austria |       .00359      .0059041      .0008083
+                    Azerbaijan |                                         
+                  Bahamas, The |                                         
+                       Bahrain |                                         
+                    Bangladesh |     .0053687      .0265245      .0151689
+                      Barbados |                                         
+                       Belarus |                                         
+                       Belgium |                                         
+                        Belize |                                         
+                         Benin |                                         
+                       Bermuda |                                         
+                        Bhutan |                                         
+                       Bolivia |     .0040314       .009711      .0226704
+        Bosnia and Herzegovina |                                         
+                      Botswana |                                         
+                        Brazil |                                         
+                        Brunei |                                         
+                      Bulgaria |                                         
+                  Burkina Faso |                                         
+                       Burundi |                                         
+                      Cambodia |                                         
+                      Cameroon |                                         
+                        Canada |     .0036572      .0052144      .0007334
+                    Cape Verde |                                         
+                Cayman Islands |                                         
+      Central African Republic |                                         
+                          Chad |                                         
+               Channel Islands |                                         
+                         Chile |     .0040068       .007456      .0032531
+                         China |                                         
+                      Colombia |     .0035434      .0066375      .0018532
+                       Comoros |                                         
+              Congo, Dem. Rep. |                                         
+                   Congo, Rep. |                                         
+                    Costa Rica |                                         
+                 Cote d'Ivoire |                                         
+                       Croatia |                                         
+                          Cuba |                                         
+                        Cyprus |                                         
+                Czech Republic |                                         
+                       Denmark |     .0030782      .0072619      .0008247
+                      Djibouti |                                         
+                      Dominica |                                         
+            Dominican Republic |                                         
+                       Ecuador |     .0038357      .0106453      .0123267
+              Egypt, Arab Rep. |     .0045538      .0115427        .02285
+                   El Salvador |     .0037173      .0104048      .0118225
+             Equatorial Guinea |                                         
+                       Eritrea |                                         
+                       Estonia |                                         
+                      Ethiopia |                                         
+                Faeroe Islands |                                         
+                          Fiji |                                         
+                       Finland |     .0035593      .0057137      .0012031
+                        France |     .0035285      .0057906      .0004698
+              French Polynesia |                                         
+                         Gabon |                                         
+                   Gambia, The |                                         
+                       Georgia |                                         
+                       Germany |                                         
+                         Ghana |     .0045325      .0087884      .0191407
+                        Greece |      .003681      .0068614      .0012347
+                     Greenland |                                         
+                       Grenada |                                         
+                          Guam |                                         
+                     Guatemala |                                         
+                        Guinea |                                         
+                 Guinea-Bissau |                                         
+                        Guyana |                                         
+                         Haiti |                                         
+                      Honduras |                                         
+              Hong Kong, China |     .0029411      .0096501      .0014143
+                       Hungary |     .0034217      .0057743      .0089618
+                       Iceland |                                         
+                         India |     .0043574       .008927      .0045994
+                     Indonesia |     .0041262      .0101932       .014256
+            Iran, Islamic Rep. |     .0043402      .0102766      .0122668
+                          Iraq |                                         
+                       Ireland |     .0032653      .0074902      .0017213
+                   Isle of Man |                                         
+                        Israel |     .0031853      .0063309      .0013507
+                         Italy |     .0035971      .0056967      .0009129
+                       Jamaica |                                         
+                         Japan |     .0033993      .0062148        .00049
+                        Jordan |                                         
+                    Kazakhstan |                                         
+                         Kenya |                                         
+                      Kiribati |                                         
+              Korea, Dem. Rep. |                                         
+                   Korea, Rep. |     .0037208      .0062997      .0022557
+                        Kuwait |                                         
+               Kyrgyz Republic |                                         
+                       Lao PDR |                                         
+                        Latvia |                                         
+                       Lebanon |                                         
+                       Lesotho |                                         
+                       Liberia |                                         
+                         Libya |                                         
+                 Liechtenstein |                                         
+                     Lithuania |                                         
+                    Luxembourg |                                         
+                  Macao, China |                                         
+                Macedonia, FYR |                                         
+                    Madagascar |                                         
+                        Malawi |                                         
+                      Malaysia |      .003662      .0069643      .0038499
+                      Maldives |                                         
+                          Mali |                                         
+                         Malta |                                         
+              Marshall Islands |                                         
+                    Mauritania |                                         
+                     Mauritius |                                         
+                       Mayotte |                                         
+                        Mexico |                                         
+         Micronesia, Fed. Sts. |                                         
+                       Moldova |                                         
+                        Monaco |                                         
+                      Mongolia |                                         
+                       Morocco |                                         
+                    Mozambique |                                         
+                       Myanmar |                                         
+                       Namibia |                                         
+                         Nepal |                                         
+                   Netherlands |     .0032272      .0067797      .0009421
+          Netherlands Antilles |                                         
+                 New Caledonia |                                         
+                   New Zealand |      .003402      .0070029      .0017507
+                     Nicaragua |      .003723      .0126419      .0109338
+                         Niger |                                         
+                       Nigeria |                                         
+      Northern Mariana Islands |                                         
+                        Norway |     .0036798      .0064854      .0015352
+                          Oman |                                         
+                      Pakistan |     .0049278      .0160708      .0161947
+                         Palau |                                         
+                        Panama |                                         
+              Papua New Guinea |                                         
+                      Paraguay |                                         
+                          Peru |                                         
+                   Philippines |     .0036166      .0078557      .0099414
+                        Poland |     .0035127      .0064154      .0159853
+                      Portugal |     .0037994      .0062707      .0038572
+                   Puerto Rico |                                         
+                         Qatar |                                         
+                       Romania |                                         
+            Russian Federation |                                         
+                        Rwanda |                                         
+                         Samoa |                                         
+         Sao Tome and Principe |                                         
+                  Saudi Arabia |                                         
+                       Senegal |                                         
+                    Seychelles |                                         
+                  Sierra Leone |                                         
+                     Singapore |      .002979      .0090375      .0049456
+               Slovak Republic |                                         
+                      Slovenia |                                         
+               Solomon Islands |                                         
+                       Somalia |                                         
+                  South Africa |     .0036472      .0055554      .0016748
+                         Spain |     .0035656      .0056253      .0015493
+                     Sri Lanka |     .0035818      .0095339      .0126046
+           St. Kitts and Nevis |                                         
+                     St. Lucia |                                         
+St. Vincent and the Grenadines |                                         
+                         Sudan |                                         
+                      Suriname |                                         
+                     Swaziland |                                         
+                        Sweden |       .00359      .0070159      .0009079
+                   Switzerland |                                         
+          Syrian Arab Republic |                                         
+                    Tajikistan |                                         
+                      Tanzania |                                         
+                      Thailand |                                         
+                          Togo |                                         
+                         Tonga |                                         
+           Trinidad and Tobago |                                         
+                       Tunisia |                                         
+                        Turkey |     .0042411      .0086283      .0037242
+                  Turkmenistan |                                         
+                        Uganda |                                         
+                       Ukraine |                                         
+          United Arab Emirates |                                         
+                United Kingdom |     .0033766      .0060885      .0006829
+                 United States |     .0033001      .0057112       .000359
+                       Uruguay |     .0036206      .0092836       .010286
+                    Uzbekistan |                                         
+                       Vanuatu |                                         
+                 Venezuela, RB |     .0037488      .0062603      .0055109
+                       Vietnam |                                         
+         Virgin Islands (U.S.) |                                         
+            West Bank and Gaza |                                         
+                   Yemen, Rep. |                                         
+         Yugoslavia, Fed. Rep. |                                         
+                        Zambia |                                         
+                      Zimbabwe |     .0038589      .0068822      .0045734
+-------------------------------------------------------------------------
+
+. table cname, c(m TAU2 m BETA m RISK)
+
+-------------------------------------------------------------------
+                  country name | mean(TAU2)  mean(BETA)  mean(RISK)
+-------------------------------+-----------------------------------
+                   Afghanistan |                                   
+                       Albania |                                   
+                       Algeria |                                   
+                American Samoa |                                   
+                       Andorra |                                   
+                        Angola |                                   
+           Antigua and Barbuda |                                   
+                     Argentina |                                   
+                       Armenia |                                   
+                         Aruba |                                   
+                     Australia |   .0131144   -.3326715    .0139758
+                       Austria |   .0049926    .0717595    .0152032
+                    Azerbaijan |                                   
+                  Bahamas, The |                                   
+                       Bahrain |                                   
+                    Bangladesh |   .1629113   -.0504425    .1783693
+                      Barbados |                                   
+                       Belarus |                                   
+                       Belgium |                                   
+                        Belize |                                   
+                         Benin |                                   
+                       Bermuda |                                   
+                        Bhutan |                                   
+                       Bolivia |   .0705716   -.0507438    .0771519
+        Bosnia and Herzegovina |                                   
+                      Botswana |                                   
+                        Brazil |                                   
+                        Brunei |                                   
+                      Bulgaria |                                   
+                  Burkina Faso |                                   
+                       Burundi |                                   
+                      Cambodia |                                   
+                      Cameroon |                                   
+                        Canada |   .0065512   -.4449314    .0095932
+                    Cape Verde |                                   
+                Cayman Islands |                                   
+      Central African Republic |                                   
+                          Chad |                                   
+               Channel Islands |                                   
+                         Chile |   .0176596     .028023    .0301121
+                         China |                                   
+                      Colombia |   .0133021   -.2092872    .0179151
+                       Comoros |                                   
+              Congo, Dem. Rep. |                                   
+                   Congo, Rep. |                                   
+                    Costa Rica |                                   
+                 Cote d'Ivoire |                                   
+                       Croatia |                                   
+                          Cuba |                                   
+                        Cyprus |                                   
+                Czech Republic |                                   
+                       Denmark |   .0047285   -.1293447    .0138454
+                      Djibouti |                                   
+                      Dominica |                                   
+            Dominican Republic |                                   
+                       Ecuador |   .0221995    .0520379     .038991
+              Egypt, Arab Rep. |   .0720635    .0016716    .0884009
+                   El Salvador |   .0163028    .1801824    .0362999
+             Equatorial Guinea |                                   
+                       Eritrea |                                   
+                       Estonia |                                   
+                      Ethiopia |                                   
+                Faeroe Islands |                                   
+                          Fiji |                                   
+                       Finland |   .0029957   -.7090499    .0080205
+                        France |   .0068618     .534586    .0235173
+              French Polynesia |                                   
+                         Gabon |                                   
+                   Gambia, The |                                   
+                       Georgia |                                   
+                       Germany |                                   
+                         Ghana |   .2493788    .0854913    .3053392
+                        Greece |   .0169782    .3284194    .0386725
+                     Greenland |                                   
+                       Grenada |                                   
+                          Guam |                                   
+                     Guatemala |                                   
+                        Guinea |                                   
+                 Guinea-Bissau |                                   
+                        Guyana |                                   
+                         Haiti |                                   
+                      Honduras |                                   
+              Hong Kong, China |    .009753   -.1338826    .0197327
+                       Hungary |   .1233126    .0096942    .1348994
+                       Iceland |                                   
+                         India |   .0195518   -.1852217    .0255934
+                     Indonesia |    .012344   -.0255963    .0260315
+            Iran, Islamic Rep. |   .5361879    .0003717    .5512034
+                          Iraq |                                   
+                       Ireland |    .006183   -.2080787    .0143655
+                   Isle of Man |                                   
+                        Israel |   .0330816    .0691794     .047175
+                         Italy |    .017942   -.0284029    .0262165
+                       Jamaica |                                   
+                         Japan |    .012962    .3379159    .0313363
+                        Jordan |                                   
+                    Kazakhstan |                                   
+                         Kenya |                                   
+                      Kiribati |                                   
+              Korea, Dem. Rep. |                                   
+                   Korea, Rep. |   .0193763   -.1958746    .0218062
+                        Kuwait |                                   
+               Kyrgyz Republic |                                   
+                       Lao PDR |                                   
+                        Latvia |                                   
+                       Lebanon |                                   
+                       Lesotho |                                   
+                       Liberia |                                   
+                         Libya |                                   
+                 Liechtenstein |                                   
+                     Lithuania |                                   
+                    Luxembourg |                                   
+                  Macao, China |                                   
+                Macedonia, FYR |                                   
+                    Madagascar |                                   
+                        Malawi |                                   
+                      Malaysia |   .0072942   -.1608492     .015574
+                      Maldives |                                   
+                          Mali |                                   
+                         Malta |                                   
+              Marshall Islands |                                   
+                    Mauritania |                                   
+                     Mauritius |                                   
+                       Mayotte |                                   
+                        Mexico |                                   
+         Micronesia, Fed. Sts. |                                   
+                       Moldova |                                   
+                        Monaco |                                   
+                      Mongolia |                                   
+                       Morocco |                                   
+                    Mozambique |                                   
+                       Myanmar |                                   
+                       Namibia |                                   
+                         Nepal |                                   
+                   Netherlands |   .0086585     .027975    .0191498
+          Netherlands Antilles |                                   
+                 New Caledonia |                                   
+                   New Zealand |   .0167402   -.2219445    .0197143
+                     Nicaragua |   .2079433    .0619029    .2500528
+                         Niger |                                   
+                       Nigeria |                                   
+      Northern Mariana Islands |                                   
+                        Norway |   .0051747   -.0716163    .0145988
+                          Oman |                                   
+                      Pakistan |   .0201794   -.1131981    .0366095
+                         Palau |                                   
+                        Panama |                                   
+              Papua New Guinea |                                   
+                      Paraguay |                                   
+                          Peru |                                   
+                   Philippines |   .0709376   -.0457205    .0759233
+                        Poland |   .7948825     .008002    .8175318
+                      Portugal |   .0206442   -.0759366    .0275789
+                   Puerto Rico |                                   
+                         Qatar |                                   
+                       Romania |                                   
+            Russian Federation |                                   
+                        Rwanda |                                   
+                         Samoa |                                   
+         Sao Tome and Principe |                                   
+                  Saudi Arabia |                                   
+                       Senegal |                                   
+                    Seychelles |                                   
+                  Sierra Leone |                                   
+                     Singapore |   .0130385   -.3120538    .0169176
+               Slovak Republic |                                   
+                      Slovenia |                                   
+               Solomon Islands |                                   
+                       Somalia |                                   
+                  South Africa |   .0034026   -.3756916    .0100485
+                         Spain |   .0097027    .1810377    .0224068
+                     Sri Lanka |   .0240133   -.1050968    .0320816
+           St. Kitts and Nevis |                                   
+                     St. Lucia |                                   
+St. Vincent and the Grenadines |                                   
+                         Sudan |                                   
+                      Suriname |                                   
+                     Swaziland |                                   
+                        Sweden |   .0137627    .0676269    .0262301
+                   Switzerland |                                   
+          Syrian Arab Republic |                                   
+                    Tajikistan |                                   
+                      Tanzania |                                   
+                      Thailand |                                   
+                          Togo |                                   
+                         Tonga |                                   
+           Trinidad and Tobago |                                   
+                       Tunisia |                                   
+                        Turkey |   .0242086   -.0833376     .033043
+                  Turkmenistan |                                   
+                        Uganda |                                   
+                       Ukraine |                                   
+          United Arab Emirates |                                   
+                United Kingdom |   .0093656    .1332905    .0213274
+                 United States |   .0044144   -.5133862    .0088932
+                       Uruguay |   .0573305    .0119766    .0716079
+                    Uzbekistan |                                   
+                       Vanuatu |                                   
+                 Venezuela, RB |   .0406203   -.0265438     .048473
+                       Vietnam |                                   
+         Virgin Islands (U.S.) |                                   
+            West Bank and Gaza |                                   
+                   Yemen, Rep. |                                   
+         Yugoslavia, Fed. Rep. |                                   
+                        Zambia |                                   
+                      Zimbabwe |   .0200638    .0731923     .033742
+-------------------------------------------------------------------
+
+. 
+. *******************************************
+. * finally lets do some ML tests
+. * log likelihood is -T/2 * (ln det V - trace(inv(V)*S)),
+. * this assumes we saved the huge matrix S with unrestricted second momens
+. * this is probably memory intensive
+. * block represent countries: there are J*J blocks, each block is S*S
+. 
+. * our V matrix
+. * Vbase does not contain HERF yet
+. 
+. 
+. /*
+> matrix Vbase = 0*I($S*$J)
+> 
+> forval j1 = 1/$J {
+>         di in gre "j(1): " in ye `j1'
+>         forval j2 = 1/$J {
+>                 di in gre "j(2): " in ye `j2'
+> 
+>                 * add the sectoral cov matrix
+>                 matrix Vbase[(j1-1)*$S+1..(j1-1)*$S+$S,(j2-1)*$S+1..(j2-1)*$S
+> +$S] = Vbase[(j1-1)*$S+1..(j1-1)*$S+$S,(j2-1)*$S+1..(j2-1)*$S+$S] + Varind
+>                 * take country cov, add it to the block
+>                                 matrix Vbase[(j1-1)*$S+1..(j1-1)*$S+$S,(j2-1)
+> *$S+1..(j2-1)*$S+$S] = Vbase[(j1-1)*$S+1..(j1-1)*$S+$S,(j2-1)*$S+1..(j2-1)*$S
+> +$S] + J($S,$S,Varcnt[rownumb(Varcnt,"Fc`j1'"),colnumb(Varcnt,"Fc`j2'")])
+>                 * add the sectoral covariance 
+>                 matrix Vbase[(j1-1)*$S+1..(j1-1)*$S+$S,(j2-1)*$S+1..(j2-1)*$S
+> +$S] = Vbase[(j1-1)*$S+1..(j1-1)*$S+$S,(j2-1)*$S+1..(j2-1)*$S+$S] + Covindcnt
+> ["Fc`j1'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1,1)*Covindcnt["Fc`j1'","Fs1".."Fs$S
+> "]+Covindcnt["Fc`j2'","Fs1".."Fs$S"]'*J(1,$S,1)+J($S,1,1)*Covindcnt["Fc`j2'",
+> "Fs1".."Fs$S"]
+>         }
+> }
+> 
+> Vrest = Vbase+sigma2*I($S*$J)
+> Vunr = Vbase+diag(vec(dnsigma2))
+> 
+> scalar Lrest = log(det(Vrest)) - trace(inv(Vrest)*S)
+> scalar Lunr = log(det(Vunr)) - trace(inv(Vunr)*S)
+> 
+> di in gre "Log likelihood (restricted):   " in ye Lrest
+> di in gre "Log likelihood (unrestricted): " in ye Lunr
+> */
+. log close
+      name:  <unnamed>
+       log:  /Users/koren/Tresorit/projects/published/voldev/replication/these 
+> are the spec measures oct 28.log
+  log type:  text
+ closed on:  12 Oct 2020, 08:38:12
+-------------------------------------------------------------------------------
