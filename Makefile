@@ -4,5 +4,5 @@ data/derived/specmeasures.dta: specmeasures.do data/derived/allfactors.dta data/
 	stata -b do $<
 data/derived/allfactors.dta: preparefactors.do data/derived/preparedshares.dta
 	stata -b do $<
-data/derived/preparedshares.dta: meanreturns.do data/wdi/wdiilo.dta data/wdi/wdinew.dta
+data/derived/preparedshares.dta: meanreturns.do data/unido/unido-dollar.dta data/wdi/wdinew.dta data/pwt/pwt_prices.dta
 	stata -b do $<

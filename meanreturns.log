@@ -22,166 +22,281 @@ Notes:
 
 . do meanreturns.do 
 
-. clear
-
-. use "data/wdi/wdiilo.dta", clear
-
-. drop share
-
-. destring, replace
-ccode: contains nonnumeric characters; no replace
-year already numeric; no replace
-sector already numeric; no replace
-empshare already numeric; no replace
-gdp2000 already numeric; no replace
-gdppc2000 already numeric; no replace
-laborforce already numeric; no replace
-yshare already numeric; no replace
-unemp already numeric; no replace
-totempl already numeric; no replace
-sumempshare already numeric; no replace
-
-. sort ccode year 
-
-. 
-. tempfile wdiilo
-
-. save `wdiilo', replace
-(note: file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01387.000001 no
-> t found)
-file /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01387.000001 saved
-
-. 
-. use "data/wdi/wdinew.dta"
-
-. sort ccode year
-
-. merge ccode year using `wdiilo'
-(note: you are using old merge syntax; see [D] merge for new syntax)
-variables ccode year do not uniquely identify observations in
-    /var/folders/f4/7drmhl1d5kj3wp1r33jvx32m0000gn/T//St01387.000001
-
-. tab _
-
-     _merge |      Freq.     Percent        Cum.
-------------+-----------------------------------
-          1 |      6,660       53.58       53.58
-          2 |      1,029        8.28       61.86
-          3 |      4,740       38.14      100.00
-------------+-----------------------------------
-      Total |     12,429      100.00
-
-. drop if ccode==""
-(0 observations deleted)
-
-. drop if cnum==.
-(1,029 observations deleted)
-
-. drop if empshare==.
-(6,728 observations deleted)
-
-. destring, replace
-cname: contains nonnumeric characters; no replace
-ccode: contains nonnumeric characters; no replace
-cnum already numeric; no replace
-year already numeric; no replace
-rgdppcp already numeric; no replace
-gdppcpppp already numeric; no replace
-cpi already numeric; no replace
-pop already numeric; no replace
-exch already numeric; no replace
-PPPfa already numeric; no replace
-consumption already numeric; no replace
-merge1 already numeric; no replace
-sector already numeric; no replace
-empshare already numeric; no replace
-gdp2000 already numeric; no replace
-gdppc2000 already numeric; no replace
-laborforce already numeric; no replace
-yshare already numeric; no replace
-unemp already numeric; no replace
-totempl already numeric; no replace
-sumempshare already numeric; no replace
-_merge already numeric; no replace
-
-. drop ccode
-
-. ren sector isic
+. use "data/unido/unido-dollar.dta", clear
 
 . gen ccode=.
-(4,672 missing values generated)
+(96,430 missing values generated)
 
-. drop if cnum==.
-(0 observations deleted)
+. 
+. * rename
+. ren ind isic
 
-. drop if isic==.
+. 
+. * drop weird stuff
+. * drop if cnum==""
+. drop if isic==300
 (0 observations deleted)
 
 . 
 . * create categ variables
 . egen countrysector = group(cnum isic)
 
-. gen share = empshare
+. 
+. gen share = empl
+(35,852 missing values generated)
 
-. gen logshock = log(yshare*gdp2000)-log(empshare*laborforce) if (ysha~=.)&(emp
-> sh~=.)
-(680 missing values generated)
+. gen logshock = log(val)-log(empl) if (val~=.)&(empl~=.)
+(44,735 missing values generated)
 
 . 
-. *-log(PPPfa)
-. gen laborprod0 = (yshare*gdp2000/(PPPfa*100))/(empshare*laborforce) 
-(777 missing values generated)
+. * deflate logshock TO INTERNATIONAL DOLLARS not domestic constant price
+. sort cnum year
 
+. merge cnum year using "data/pwt/pwt_prices.dta"
+(note: you are using old merge syntax; see [D] merge for new syntax)
+variables cnum year do not uniquely identify observations in the master data
+
+. tab _
+
+     _merge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      4,980        4.92        4.92
+          2 |      4,855        4.79        9.71
+          3 |     91,450       90.29      100.00
+------------+-----------------------------------
+      Total |    101,285      100.00
+
+. drop if _==2
+(4,855 observations deleted)
+
+. drop _
+
+. 
+. sort cnum year
+
+. merge cnum year using "data/wdi/wdinew.dta"
+(note: you are using old merge syntax; see [D] merge for new syntax)
+variables cnum year do not uniquely identify observations in the master data
+(note: variable ccode was str3 in the using data, but will be float now)
+(note: variable cname was str32, now str34 to accommodate using data's
+       values)
+
+. tab _
+
+     _merge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |     11,875       11.88       11.88
+          2 |      3,515        3.52       15.40
+          3 |     84,555       84.60      100.00
+------------+-----------------------------------
+      Total |     99,945      100.00
+
+. drop if _==2
+(3,515 observations deleted)
+
+. drop _ 
+
+. 
+. gen temp=cpi if cnum==840
+(95,727 missing values generated)
+
+. egen cpiUSA=mean(temp), by(year)
+(1637 missing values generated)
+
+. 
+. * use cpi here but PPPfa elsewhere 
+. replace logshock = logshock-log(p)-log(cpiUSA) 
+(51,695 real changes made, 6,442 to missing)
+
+. 
+. * now back for the level of labor prod
+. * <=. WAS WRONG
+. gen laborprod0 = (val/p*100)/empl if (val+empl+p<.)
+(50,602 missing values generated)
+
+. 
 . su laborprod0, d
 
                          laborprod0
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%     .0062751        .000125
- 5%      .046386       .0002388
-10%     .1423287       .0003415       Obs               3,895
-25%     1.526312       .0003476       Sum of Wgt.       3,895
+ 1%     1.070421      -159.1546
+ 5%     2.629073      -42.08187
+10%     3.925706      -17.84368       Obs              45,828
+25%     7.359031      -14.06624       Sum of Wgt.      45,828
 
-50%     14.42228                      Mean           7.97e+09
-                        Largest       Std. Dev.      1.78e+11
-75%     105.1994       3.34e+12
-90%      480.144       4.09e+12       Variance       3.18e+22
-95%     1308.501       4.25e+12       Skewness       30.28771
-99%      6252644       7.62e+12       Kurtosis       1068.725
+50%     14.57732                      Mean            22.6615
+                        Largest       Std. Dev.      30.57024
+75%     28.56588       823.3418
+90%     48.23658       824.1932       Variance       934.5397
+95%     63.77706       1416.589       Skewness       12.46141
+99%     125.2678       1835.237       Kurtosis       450.5568
 
 . 
 . tsset countrysector year
        panel variable:  countrysector (unbalanced)
-        time variable:  year, 1980 to 1999, but with gaps
+        time variable:  year, 1963 to 2000, but with gaps
                 delta:  1 unit
 
 . 
 . gen Dshock = logshock-L5.logshock
-(2,327 missing values generated)
+(62,141 missing values generated)
 
 . * to take fifth difference
 . * alternatively, we may take a fancier filter, e.g. Baxter-King, Hodrick-Pres
 > cott
 . * these programs are avaiable for Stata
+. 
 . * drop outliers
 . 
-. /*
-> ************FOR UNIDO DATA
-> drop if (cname=="Peru") & (year>=1979) & (year<=1981)
-> drop if (cname=="Angola")
-> drop if (cname=="Azerbaijan")
-> drop if (cname=="Brazil") & (year==1985)
-> 
-> count if (Dshock>5*log(2))&(Dshock!=.)
-> l cname year isic Dshock if (Dshock>5*log(2))&(Dshock!=.)
-> ************change this!!!
-> drop if (Dshock>5*log(2))&(Dshock!=.)
-> 
-> ***********change this!!!
-> count if Dshock<-5*log(2)
-> l cname year isic Dshock if Dshock<-5*log(2)
-> drop if Dshock<-5*log(2)
-> */
+. 
+. ************FOR UNIDO DATA
+. drop if (cname=="Peru") & (year>=1979) & (year<=1981)
+(57 observations deleted)
+
+. drop if (cname=="Angola")
+(704 observations deleted)
+
+. drop if (cname=="Azerbaijan")
+(95 observations deleted)
+
+. drop if (cname=="Brazil") & (year==1985)
+(17 observations deleted)
+
+. 
+. count if (Dshock>5*log(2))&(Dshock!=.)
+  78
+
+. l cname year isic Dshock if (Dshock>5*log(2))&(Dshock!=.)
+
+       +-----------------------------------+
+       |    cname   year   isic     Dshock |
+       |-----------------------------------|
+ 7629. |   Brazil   1990    311   20.02413 |
+ 7666. |   Brazil   1990    321     19.932 |
+ 7799. |   Brazil   1990    331   20.11984 |
+ 7836. |   Brazil   1990    332   20.57726 |
+ 7873. |   Brazil   1990    341   19.99116 |
+       |-----------------------------------|
+ 7910. |   Brazil   1990    342   20.41765 |
+ 7947. |   Brazil   1990    351   19.74609 |
+ 7984. |   Brazil   1990    355   19.71843 |
+ 8021. |   Brazil   1990    356   20.07973 |
+ 8058. |   Brazil   1990    361   20.38589 |
+       |-----------------------------------|
+ 8127. |   Brazil   1990    381    20.6492 |
+ 8164. |   Brazil   1990    383   20.03058 |
+ 8201. |   Brazil   1990    384   20.14464 |
+43000. |  Jamaica   1969    371   3.747217 |
+43001. |  Jamaica   1970    371   3.531042 |
+       |-----------------------------------|
+43002. |  Jamaica   1971    371   3.760158 |
+44380. |   Jordan   1976    381   5.095486 |
+52410. |   Malawi   1998    361   3.569022 |
+63959. |  Nigeria   1996    384   3.557865 |
+67418. |     Peru   1984    311   14.91828 |
+       |-----------------------------------|
+67419. |     Peru   1985    311   14.72851 |
+67420. |     Peru   1986    311   14.40442 |
+67453. |     Peru   1984    321    15.0054 |
+67454. |     Peru   1985    321   14.98823 |
+67455. |     Peru   1986    321   14.68074 |
+       |-----------------------------------|
+67488. |     Peru   1984    322   15.29756 |
+67489. |     Peru   1985    322   14.85804 |
+67490. |     Peru   1986    322   14.73667 |
+67523. |     Peru   1984    323   14.62147 |
+67524. |     Peru   1985    323   14.24103 |
+       |-----------------------------------|
+67525. |     Peru   1986    323    14.7304 |
+67558. |     Peru   1984    324   14.87209 |
+67559. |     Peru   1985    324   14.57669 |
+67560. |     Peru   1986    324   14.18979 |
+67593. |     Peru   1984    331   14.53943 |
+       |-----------------------------------|
+67594. |     Peru   1985    331   14.35476 |
+67595. |     Peru   1986    331   14.13841 |
+67628. |     Peru   1984    332     15.049 |
+67629. |     Peru   1985    332   14.43611 |
+67630. |     Peru   1986    332   13.49648 |
+       |-----------------------------------|
+67663. |     Peru   1984    341   15.03092 |
+67664. |     Peru   1985    341   14.79048 |
+67665. |     Peru   1986    341    14.4397 |
+67698. |     Peru   1984    342   15.32601 |
+67699. |     Peru   1985    342   14.90226 |
+       |-----------------------------------|
+67700. |     Peru   1986    342   14.43399 |
+67733. |     Peru   1984    351   15.84165 |
+67734. |     Peru   1985    351   15.99331 |
+67735. |     Peru   1986    351   15.11001 |
+67768. |     Peru   1984    355   15.74734 |
+       |-----------------------------------|
+67769. |     Peru   1985    355   15.15907 |
+67770. |     Peru   1986    355   14.76474 |
+67803. |     Peru   1984    356   15.29914 |
+67804. |     Peru   1985    356   15.04368 |
+67805. |     Peru   1986    356   14.63203 |
+       |-----------------------------------|
+67838. |     Peru   1984    361   15.48235 |
+67839. |     Peru   1985    361    15.0633 |
+67840. |     Peru   1986    361   14.82481 |
+67873. |     Peru   1984    371   14.42303 |
+67874. |     Peru   1985    371   14.16069 |
+       |-----------------------------------|
+67875. |     Peru   1986    371   14.26081 |
+67908. |     Peru   1984    381   14.87351 |
+67909. |     Peru   1985    381    14.6337 |
+67910. |     Peru   1986    381   14.49028 |
+67943. |     Peru   1984    383   15.19822 |
+       |-----------------------------------|
+67944. |     Peru   1985    383   14.85837 |
+67945. |     Peru   1986    383   14.59187 |
+67978. |     Peru   1984    384   15.16282 |
+67979. |     Peru   1985    384   14.52876 |
+67980. |     Peru   1986    384    14.5245 |
+       |-----------------------------------|
+68013. |     Peru   1984    385     15.404 |
+68014. |     Peru   1985    385   15.11253 |
+68015. |     Peru   1986    385   14.66162 |
+68048. |     Peru   1984    390   15.07403 |
+68049. |     Peru   1985    390    14.4357 |
+       |-----------------------------------|
+68050. |     Peru   1986    390   14.56088 |
+82507. | Thailand   1991    342   5.007933 |
+88240. |    Egypt   1998    323    4.17321 |
+       +-----------------------------------+
+
+. ************change this!!!
+. drop if (Dshock>5*log(2))&(Dshock!=.)
+(78 observations deleted)
+
+. 
+. ***********change this!!!
+. count if Dshock<-5*log(2)
+  8
+
+. l cname year isic Dshock if Dshock<-5*log(2)
+
+       +-------------------------------------------------------+
+       |                       cname   year   isic      Dshock |
+       |-------------------------------------------------------|
+19127. |                  Costa Rica   1999    385   -4.169993 |
+55345. |                   Mauritius   1998    361   -3.664863 |
+63401. |                     Nigeria   1996    321   -4.909962 |
+63509. |                     Nigeria   1996    324   -3.630276 |
+63905. |                     Nigeria   1996    383   -3.902119 |
+       |-------------------------------------------------------|
+88158. |                       Egypt   1993    323   -4.530517 |
+89558. | United Republic of Tanzania   1995    323   -4.380703 |
+89559. | United Republic of Tanzania   1996    323    -4.91194 |
+       +-------------------------------------------------------+
+
+. drop if Dshock<-5*log(2)
+(8 observations deleted)
+
+. 
+. 
 . * now try to balance it somehow
 . egen numind = count(laborprod0), by(cnum year)
 
@@ -189,10 +304,10 @@ _merge already numeric; no replace
 
     Variable |        Obs        Mean    Std. Dev.       Min        Max
 -------------+---------------------------------------------------------
-      numind |      4,672    2.489084    1.111956          0          3
+      numind |     95,471    8.895727    9.045071          0         19
 
-. keep if numind==3
-(847 observations deleted)
+. keep if numind==r(max)
+(62,392 observations deleted)
 
 . egen numyea = count(laborprod0), by(cnum isic)
 
@@ -200,111 +315,110 @@ _merge already numeric; no replace
 
      numyea |      Freq.     Percent        Cum.
 ------------+-----------------------------------
-          1 |         51        1.33        1.33
-          2 |        192        5.02        6.35
-          3 |         18        0.47        6.82
-          4 |         12        0.31        7.14
-          5 |         30        0.78        7.92
-          6 |        108        2.82       10.75
-          7 |        147        3.84       14.59
-          8 |         96        2.51       17.10
-          9 |        162        4.24       21.33
-         10 |        300        7.84       29.18
-         11 |         66        1.73       30.90
-         12 |         72        1.88       32.78
-         13 |         39        1.02       33.80
-         14 |        126        3.29       37.10
-         15 |         90        2.35       39.45
-         16 |         96        2.51       41.96
-         17 |        255        6.67       48.63
-         18 |         54        1.41       50.04
-         19 |        171        4.47       54.51
-         20 |      1,740       45.49      100.00
+          2 |        114        0.34        0.34
+          4 |         76        0.23        0.57
+          5 |        380        1.15        1.72
+          6 |        114        0.34        2.07
+          7 |        133        0.40        2.47
+          8 |        152        0.46        2.93
+          9 |        342        1.03        3.96
+         10 |        380        1.15        5.11
+         11 |        418        1.26        6.38
+         12 |        228        0.69        7.06
+         13 |        494        1.49        8.56
+         14 |        266        0.80        9.36
+         15 |        285        0.86       10.22
+         18 |        342        1.03       11.26
+         19 |        722        2.18       13.44
+         20 |        380        1.15       14.59
+         21 |        399        1.21       15.80
+         22 |        418        1.26       17.06
+         23 |        874        2.64       19.70
+         24 |        456        1.38       21.08
+         25 |        950        2.87       23.95
+         27 |        513        1.55       25.50
+         28 |      1,064        3.22       28.72
+         29 |        551        1.67       30.38
+         30 |      3,420       10.34       40.72
+         31 |      1,178        3.56       44.28
+         32 |        608        1.84       46.12
+         33 |      4,389       13.27       59.39
+         34 |      1,938        5.86       65.25
+         36 |        684        2.07       67.32
+         37 |        703        2.13       69.44
+         38 |     10,108       30.56      100.00
 ------------+-----------------------------------
-      Total |      3,825      100.00
+      Total |     33,079      100.00
 
 . su numyea
 
     Variable |        Obs        Mean    Std. Dev.       Min        Max
 -------------+---------------------------------------------------------
-      numyea |      3,825    15.08314    5.952162          1         20
+      numyea |     33,079    30.15221      8.6864          2         38
 
 . 
-. 
 . ************** THRESHOLD ******************
-. * keep only if more than 10 years
-. keep if (numyea>=10)&(numyea!=.)
-(816 observations deleted)
+. * keep only if more than 20 years
+. keep if (numyea>=20)&(numyea!=.)
+(4,446 observations deleted)
 
 . 
 . 
 . tab cname if laborprod0<.
 
-                      country name |      Freq.     Percent        Cum.
+                             cname |      Freq.     Percent        Cum.
 -----------------------------------+-----------------------------------
-                           Armenia |         30        1.00        1.00
-                         Australia |         60        1.99        2.99
-                           Austria |         60        1.99        4.99
-                        Azerbaijan |         30        1.00        5.98
-                          Barbados |         57        1.89        7.88
-                           Belgium |         60        1.99        9.87
-                           Bolivia |         30        1.00       10.87
-                            Brazil |         51        1.69       12.56
-                          Bulgaria |         60        1.99       14.56
-                            Canada |         60        1.99       16.55
-                             Chile |         60        1.99       18.54
-                             China |         42        1.40       19.94
-                          Colombia |         48        1.60       21.54
-                        Costa Rica |         60        1.99       23.53
-                            Cyprus |         45        1.50       25.02
-                           Denmark |         57        1.89       26.92
-                           Ecuador |         30        1.00       27.92
-                  Egypt, Arab Rep. |         45        1.50       29.41
-                       El Salvador |         42        1.40       30.81
-                           Estonia |         33        1.10       31.90
-                           Finland |         60        1.99       33.90
-                            France |         60        1.99       35.89
-                            Greece |         60        1.99       37.89
-                          Honduras |         51        1.69       39.58
-                  Hong Kong, China |         60        1.99       41.58
-                           Iceland |         60        1.99       43.57
-                         Indonesia |         51        1.69       45.26
-                           Ireland |         60        1.99       47.26
-                             Italy |         60        1.99       49.25
-                             Japan |         60        1.99       51.25
-                        Kazakhstan |         30        1.00       52.24
-                       Korea, Rep. |         60        1.99       54.24
-                   Kyrgyz Republic |         39        1.30       55.53
-                            Latvia |         30        1.00       56.53
-                        Luxembourg |         60        1.99       58.52
-                          Malaysia |         54        1.79       60.32
-                            Mexico |         36        1.20       61.52
-                          Mongolia |         30        1.00       62.51
-                       Netherlands |         60        1.99       64.51
-                       New Zealand |         60        1.99       66.50
-                         Nicaragua |         30        1.00       67.50
-                            Norway |         60        1.99       69.49
-                          Pakistan |         60        1.99       71.49
-                            Panama |         51        1.69       73.18
-                          Paraguay |         51        1.69       74.88
-                              Peru |         30        1.00       75.87
-                       Philippines |         60        1.99       77.87
-                            Poland |         30        1.00       78.86
-                          Portugal |         42        1.40       80.26
-                           Romania |         36        1.20       81.46
-                         Singapore |         57        1.89       83.35
-                             Spain |         60        1.99       85.34
-                         Sri Lanka |         33        1.10       86.44
-                            Sweden |         60        1.99       88.43
-                          Thailand |         60        1.99       90.43
-               Trinidad and Tobago |         60        1.99       92.42
-                            Turkey |         48        1.60       94.02
-                    United Kingdom |         60        1.99       96.01
-                     United States |         60        1.99       98.01
-                     Venezuela, RB |         60        1.99      100.00
+                         Australia |        570        1.99        1.99
+                           Austria |        722        2.52        4.51
+                        Bangladesh |        532        1.86        6.37
+                           Bolivia |        513        1.79        8.16
+                            Canada |        722        2.52       10.68
+                             Chile |        722        2.52       13.21
+              China, Hong Kong SAR |        475        1.66       14.86
+            China, Taiwan Province |        456        1.59       16.46
+                          Colombia |        722        2.52       18.98
+                           Denmark |        551        1.92       20.90
+                           Ecuador |        684        2.39       23.29
+                             Egypt |        627        2.19       25.48
+                       El Salvador |        380        1.33       26.81
+                           Finland |        608        2.12       28.93
+                            France |        627        2.19       31.12
+             Germany, Western Part |        437        1.53       32.65
+                             Ghana |        418        1.46       34.11
+                            Greece |        722        2.52       36.63
+                           Hungary |        589        2.06       38.69
+                             India |        722        2.52       41.21
+                         Indonesia |        437        1.53       42.73
+         Iran, Islamic Republic of |        570        1.99       44.72
+                           Ireland |        722        2.52       47.25
+                            Israel |        627        2.19       49.44
+                             Italy |        646        2.26       51.69
+                             Japan |        722        2.52       54.21
+                Korea, Republic of |        722        2.52       56.74
+                          Malaysia |        627        2.19       58.93
+                       Netherlands |        627        2.19       61.11
+                       New Zealand |        532        1.86       62.97
+                         Nicaragua |        399        1.39       64.37
+                            Norway |        722        2.52       66.89
+                          Pakistan |        570        1.99       68.88
+                       Philippines |        646        2.26       71.13
+                            Poland |        570        1.99       73.13
+                          Portugal |        570        1.99       75.12
+                         Singapore |        722        2.52       77.64
+                      South Africa |        646        2.26       79.89
+                             Spain |        722        2.52       82.42
+                         Sri Lanka |        475        1.66       84.07
+                            Sweden |        722        2.52       86.60
+                            Turkey |        722        2.52       89.12
+                    United Kingdom |        589        2.06       91.17
+          United States of America |        627        2.19       93.36
+                           Uruguay |        570        1.99       95.36
+                         Venezuela |        627        2.19       97.54
+                          Zimbabwe |        703        2.46      100.00
 -----------------------------------+-----------------------------------
-                             Total |      3,009      100.00
+                             Total |     28,633      100.00
 
+. 
 . 
 . * create categ
 . egen country=group(cnum)
@@ -313,7 +427,7 @@ _merge already numeric; no replace
 
     Variable |        Obs        Mean    Std. Dev.       Min        Max
 -------------+---------------------------------------------------------
-     country |      3,009    30.38385    17.06332          1         60
+     country |     28,633    24.50896     13.6194          1         47
 
 . global J = r(max)
 
@@ -324,7 +438,7 @@ _merge already numeric; no replace
 
     Variable |        Obs        Mean    Std. Dev.       Min        Max
 -------------+---------------------------------------------------------
-      sector |      3,009           2    .8166323          1          3
+      sector |     28,633          10    5.477321          1         19
 
 . global S = r(max)
 
@@ -339,18 +453,17 @@ _merge already numeric; no replace
 . *egen mean = mean(Dshock), by(sector country)
 . 
 . gen shock = Dshock-mind-mcnt+moverall
-(940 missing values generated)
+(4,829 missing values generated)
 
 . 
 . * then the shares
 . egen sumshare = sum(share), by(country year)
 
 . replace share = share/sumshare
-(3,009 real changes made)
+(28,633 real changes made)
 
 . 
 . save "data/derived/shares.dta", replace 
-(note: file data/derived/shares.dta not found)
 file data/derived/shares.dta saved
 
 . 
@@ -362,45 +475,44 @@ file data/derived/shares.dta saved
                       (mean) laborprod0
 -------------------------------------------------------------
       Percentiles      Smallest
- 1%      .023685       .0077565
- 5%     .1201007        .023685
-10%     .4132689       .0340964       Obs                 180
-25%     3.055466       .0584703       Sum of Wgt.         180
+ 1%     3.171845       2.494038
+ 5%     6.270967        2.56112
+10%     8.927624       2.584828       Obs                 893
+25%     13.41063       2.594552       Sum of Wgt.         893
 
-50%     40.69208                      Mean           7.88e+09
-                        Largest       Std. Dev.      7.02e+10
-75%     213.5455       26683.18
-90%     913.3689       1.59e+11       Variance       4.93e+21
-95%     2663.076       4.37e+11       Skewness       10.09961
-99%     4.37e+11       8.23e+11       Kurtosis       110.0293
+50%     20.17905                      Mean           23.29936
+                        Largest       Std. Dev.        16.926
+75%     28.38597       138.9766
+90%     39.60019       142.8606       Variance       286.4894
+95%     49.03619       159.8158       Skewness       3.784294
+99%     93.29829       201.1104       Kurtosis       28.75851
 
 . 
 . sort cnum isic
 
 . save "data/derived/meanlaborprod_long.dta", replace
-(note: file data/derived/meanlaborprod_long.dta not found)
 file data/derived/meanlaborprod_long.dta saved
 
 . 
 . keep sector country laborprod
 
 . reshape wide laborprod, i(country) j(sector)
-(note: j = 1 2 3)
+(note: j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                      180   ->      60
-Number of variables                   3   ->       4
-j variable (3 values)            sector   ->   (dropped)
+Number of obs.                      893   ->      47
+Number of variables                   3   ->      20
+j variable (19 values)           sector   ->   (dropped)
 xij variables:
-                              laborprod   ->   laborprod1 laborprod2 laborprod3
+                              laborprod   ->   laborprod1 laborprod2 ... laborp
+> rod19
 -----------------------------------------------------------------------------
 
 . 
 . sort country
 
 . save "data/derived/meanlaborprod_wide.dta", replace
-(note: file data/derived/meanlaborprod_wide.dta not found)
 file data/derived/meanlaborprod_wide.dta saved
 
 . 
@@ -412,22 +524,21 @@ file data/derived/meanlaborprod_wide.dta saved
 . keep share country year sector cnum
 
 . reshape wide share, i(country cnum year) j(sector)
-(note: j = 1 2 3)
+(note: j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                     3009   ->    1003
-Number of variables                   5   ->       6
-j variable (3 values)            sector   ->   (dropped)
+Number of obs.                    28633   ->    1507
+Number of variables                   5   ->      22
+j variable (19 values)           sector   ->   (dropped)
 xij variables:
-                                  share   ->   share1 share2 share3
+                                  share   ->   share1 share2 ... share19
 -----------------------------------------------------------------------------
 
 . 
 . sort cnum year
 
 . save "data/derived/preparedshares.dta", replace
-(note: file data/derived/preparedshares.dta not found)
 file data/derived/preparedshares.dta saved
 
 . 
@@ -442,26 +553,70 @@ file data/derived/preparedshares.dta saved
 . keep cntsec year shock
 
 . reshape wide shock, i(year) j(cntsec)
-(note: j = 101 102 103 201 202 203 301 302 303 401 402 403 501 502 503 601 602 
-> 603 701 702 703 801 802 803 901 902 903 1001 1002 1003 1101 1102 1103 1201 12
-> 02 1203 1301 1302 1303 1401 1402 1403 1501 1502 1503 1601 1602 1603 1701 1702
->  1703 1801 1802 1803 1901 1902 1903 2001 2002 2003 2101 2102 2103 2201 2202 2
-> 203 2301 2302 2303 2401 2402 2403 2501 2502 2503 2601 2602 2603 2701 2702 270
-> 3 2801 2802 2803 2901 2902 2903 3001 3002 3003 3101 3102 3103 3201 3202 3203 
-> 3301 3302 3303 3401 3402 3403 3501 3502 3503 3601 3602 3603 3701 3702 3703 38
-> 01 3802 3803 3901 3902 3903 4001 4002 4003 4101 4102 4103 4201 4202 4203 4301
->  4302 4303 4401 4402 4403 4501 4502 4503 4601 4602 4603 4701 4702 4703 4801 4
-> 802 4803 4901 4902 4903 5001 5002 5003 5101 5102 5103 5201 5202 5203 5301 530
-> 2 5303 5401 5402 5403 5501 5502 5503 5601 5602 5603 5701 5702 5703 5801 5802 
-> 5803 5901 5902 5903 6001 6002 6003)
+(note: j = 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 
+> 118 119 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 2
+> 18 219 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 31
+> 8 319 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418
+>  419 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 
+> 519 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 6
+> 19 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 71
+> 9 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819
+>  901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 
+> 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010 1011 1012 1013 1014 1015 10
+> 16 1017 1018 1019 1101 1102 1103 1104 1105 1106 1107 1108 1109 1110 1111 1112
+>  1113 1114 1115 1116 1117 1118 1119 1201 1202 1203 1204 1205 1206 1207 1208 1
+> 209 1210 1211 1212 1213 1214 1215 1216 1217 1218 1219 1301 1302 1303 1304 130
+> 5 1306 1307 1308 1309 1310 1311 1312 1313 1314 1315 1316 1317 1318 1319 1401 
+> 1402 1403 1404 1405 1406 1407 1408 1409 1410 1411 1412 1413 1414 1415 1416 14
+> 17 1418 1419 1501 1502 1503 1504 1505 1506 1507 1508 1509 1510 1511 1512 1513
+>  1514 1515 1516 1517 1518 1519 1601 1602 1603 1604 1605 1606 1607 1608 1609 1
+> 610 1611 1612 1613 1614 1615 1616 1617 1618 1619 1701 1702 1703 1704 1705 170
+> 6 1707 1708 1709 1710 1711 1712 1713 1714 1715 1716 1717 1718 1719 1801 1802 
+> 1803 1804 1805 1806 1807 1808 1809 1810 1811 1812 1813 1814 1815 1816 1817 18
+> 18 1819 1901 1902 1903 1904 1905 1906 1907 1908 1909 1910 1911 1912 1913 1914
+>  1915 1916 1917 1918 1919 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2
+> 011 2012 2013 2014 2015 2016 2017 2018 2019 2101 2102 2103 2104 2105 2106 210
+> 7 2108 2109 2110 2111 2112 2113 2114 2115 2116 2117 2118 2119 2201 2202 2203 
+> 2204 2205 2206 2207 2208 2209 2210 2211 2212 2213 2214 2215 2216 2217 2218 22
+> 19 2301 2302 2303 2304 2305 2306 2307 2308 2309 2310 2311 2312 2313 2314 2315
+>  2316 2317 2318 2319 2401 2402 2403 2404 2405 2406 2407 2408 2409 2410 2411 2
+> 412 2413 2414 2415 2416 2417 2418 2419 2501 2502 2503 2504 2505 2506 2507 250
+> 8 2509 2510 2511 2512 2513 2514 2515 2516 2517 2518 2519 2601 2602 2603 2604 
+> 2605 2606 2607 2608 2609 2610 2611 2612 2613 2614 2615 2616 2617 2618 2619 27
+> 01 2702 2703 2704 2705 2706 2707 2708 2709 2710 2711 2712 2713 2714 2715 2716
+>  2717 2718 2719 2801 2802 2803 2804 2805 2806 2807 2808 2809 2810 2811 2812 2
+> 813 2814 2815 2816 2817 2818 2819 2901 2902 2903 2904 2905 2906 2907 2908 290
+> 9 2910 2911 2912 2913 2914 2915 2916 2917 2918 2919 3001 3002 3003 3004 3005 
+> 3006 3007 3008 3009 3010 3011 3012 3013 3014 3015 3016 3017 3018 3019 3101 31
+> 02 3103 3104 3105 3106 3107 3108 3109 3110 3111 3112 3113 3114 3115 3116 3117
+>  3118 3119 3201 3202 3203 3204 3205 3206 3207 3208 3209 3210 3211 3212 3213 3
+> 214 3215 3216 3217 3218 3219 3301 3302 3303 3304 3305 3306 3307 3308 3309 331
+> 0 3311 3312 3313 3314 3315 3316 3317 3318 3319 3401 3402 3403 3404 3405 3406 
+> 3407 3408 3409 3410 3411 3412 3413 3414 3415 3416 3417 3418 3419 3501 3502 35
+> 03 3504 3505 3506 3507 3508 3509 3510 3511 3512 3513 3514 3515 3516 3517 3518
+>  3519 3601 3602 3603 3604 3605 3606 3607 3608 3609 3610 3611 3612 3613 3614 3
+> 615 3616 3617 3618 3619 3701 3702 3703 3704 3705 3706 3707 3708 3709 3710 371
+> 1 3712 3713 3714 3715 3716 3717 3718 3719 3801 3802 3803 3804 3805 3806 3807 
+> 3808 3809 3810 3811 3812 3813 3814 3815 3816 3817 3818 3819 3901 3902 3903 39
+> 04 3905 3906 3907 3908 3909 3910 3911 3912 3913 3914 3915 3916 3917 3918 3919
+>  4001 4002 4003 4004 4005 4006 4007 4008 4009 4010 4011 4012 4013 4014 4015 4
+> 016 4017 4018 4019 4101 4102 4103 4104 4105 4106 4107 4108 4109 4110 4111 411
+> 2 4113 4114 4115 4116 4117 4118 4119 4201 4202 4203 4204 4205 4206 4207 4208 
+> 4209 4210 4211 4212 4213 4214 4215 4216 4217 4218 4219 4301 4302 4303 4304 43
+> 05 4306 4307 4308 4309 4310 4311 4312 4313 4314 4315 4316 4317 4318 4319 4401
+>  4402 4403 4404 4405 4406 4407 4408 4409 4410 4411 4412 4413 4414 4415 4416 4
+> 417 4418 4419 4501 4502 4503 4504 4505 4506 4507 4508 4509 4510 4511 4512 451
+> 3 4514 4515 4516 4517 4518 4519 4601 4602 4603 4604 4605 4606 4607 4608 4609 
+> 4610 4611 4612 4613 4614 4615 4616 4617 4618 4619 4701 4702 4703 4704 4705 47
+> 06 4707 4708 4709 4710 4711 4712 4713 4714 4715 4716 4717 4718 4719)
 
 Data                               long   ->   wide
 -----------------------------------------------------------------------------
-Number of obs.                     3009   ->      20
-Number of variables                   3   ->     181
-j variable (180 values)          cntsec   ->   (dropped)
+Number of obs.                    28633   ->      38
+Number of variables                   3   ->     894
+j variable (893 values)          cntsec   ->   (dropped)
 xij variables:
-                                  shock   ->   shock101 shock102 ... shock6003
+                                  shock   ->   shock101 shock102 ... shock4719
 -----------------------------------------------------------------------------
 
 . * this is very wide, may need more memory 

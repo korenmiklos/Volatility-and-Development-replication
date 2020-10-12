@@ -1,33 +1,42 @@
-clear
-use "data/wdi/wdiilo.dta", clear
-drop share
-destring, replace
-sort ccode year 
-
-tempfile wdiilo
-save `wdiilo', replace
-
-use "data/wdi/wdinew.dta"
-sort ccode year
-merge ccode year using `wdiilo'
-tab _
-drop if ccode==""
-drop if cnum==.
-drop if empshare==.
-destring, replace
-drop ccode
-ren sector isic
+use "data/unido/unido-dollar.dta", clear
 gen ccode=.
-drop if cnum==.
-drop if isic==.
+
+* rename
+ren ind isic
+
+* drop weird stuff
+* drop if cnum==""
+drop if isic==300
 
 * create categ variables
 egen countrysector = group(cnum isic)
-gen share = empshare
-gen logshock = log(yshare*gdp2000)-log(empshare*laborforce) if (ysha~=.)&(empsh~=.)
 
-*-log(PPPfa)
-gen laborprod0 = (yshare*gdp2000/(PPPfa*100))/(empshare*laborforce) 
+gen share = empl
+gen logshock = log(val)-log(empl) if (val~=.)&(empl~=.)
+
+* deflate logshock TO INTERNATIONAL DOLLARS not domestic constant price
+sort cnum year
+merge cnum year using "data/pwt/pwt_prices.dta"
+tab _
+drop if _==2
+drop _
+
+sort cnum year
+merge cnum year using "data/wdi/wdinew.dta"
+tab _
+drop if _==2
+drop _ 
+
+gen temp=cpi if cnum==840
+egen cpiUSA=mean(temp), by(year)
+
+* use cpi here but PPPfa elsewhere 
+replace logshock = logshock-log(p)-log(cpiUSA) 
+
+* now back for the level of labor prod
+* <=. WAS WRONG
+gen laborprod0 = (val/p*100)/empl if (val+empl+p<.)
+
 su laborprod0, d
 
 tsset countrysector year
@@ -36,9 +45,10 @@ gen Dshock = logshock-L5.logshock
 * to take fifth difference
 * alternatively, we may take a fancier filter, e.g. Baxter-King, Hodrick-Prescott
 * these programs are avaiable for Stata
+
 * drop outliers
 
-/*
+
 ************FOR UNIDO DATA
 drop if (cname=="Peru") & (year>=1979) & (year<=1981)
 drop if (cname=="Angola")
@@ -54,22 +64,23 @@ drop if (Dshock>5*log(2))&(Dshock!=.)
 count if Dshock<-5*log(2)
 l cname year isic Dshock if Dshock<-5*log(2)
 drop if Dshock<-5*log(2)
-*/
+
+
 * now try to balance it somehow
 egen numind = count(laborprod0), by(cnum year)
 su numind
-keep if numind==3
+keep if numind==r(max)
 egen numyea = count(laborprod0), by(cnum isic)
 tab numyea
 su numyea
 
-
 ************** THRESHOLD ******************
-* keep only if more than 10 years
-keep if (numyea>=10)&(numyea!=.)
+* keep only if more than 20 years
+keep if (numyea>=20)&(numyea!=.)
 
 
 tab cname if laborprod0<.
+
 
 * create categ
 egen country=group(cnum)

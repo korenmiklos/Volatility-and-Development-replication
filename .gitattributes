@@ -20,3 +20,8 @@ voldev.dta filter=lfs diff=lfs merge=lfs -text
 allfactors_wide30.dta filter=lfs diff=lfs merge=lfs -text
 factors_temp30.dta filter=lfs diff=lfs merge=lfs -text
 wdinew.dta filter=lfs diff=lfs merge=lfs -text
+data/ filter=lfs diff=lfs merge=lfs -text
+data/derived/ filter=lfs diff=lfs merge=lfs -text
+data/wdi/ filter=lfs diff=lfs merge=lfs -text
+data/unido/ filter=lfs diff=lfs merge=lfs -text
+data/pwt/ filter=lfs diff=lfs merge=lfs -text

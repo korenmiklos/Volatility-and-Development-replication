@@ -32,7 +32,7 @@ Notes:
 
 . 
 . gen loggdp = log(rgdpch)
-(3,924 missing values generated)
+(3,993 missing values generated)
 
 . 
 . rename COV Sector_Country_Covariance
@@ -95,34 +95,34 @@ Notes:
 . 
 . xtreg `1' `2', i(country) fe
 
-Fixed-effects (within) regression               Number of obs     =        911
-Group variable: country                         Number of groups  =         55
+Fixed-effects (within) regression               Number of obs     =      1,427
+Group variable: country                         Number of groups  =         45
 
 R-sq:                                           Obs per group:
-     within  = 0.1011                                         min =          1
-     between = 0.2142                                         avg =       16.6
-     overall = 0.2462                                         max =         20
+     within  = 0.0042                                         min =         20
+     between = 0.4261                                         avg =       31.7
+     overall = 0.3372                                         max =         37
 
-                                                F(1,855)          =      96.19
-corr(u_i, Xb)  = -0.2416                        Prob > F          =     0.0000
+                                                F(1,1381)         =       5.76
+corr(u_i, Xb)  = 0.5714                         Prob > F          =     0.0165
 
 ------------------------------------------------------------------------------
   Herfindahl |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
-      loggdp |    .008497   .0008664     9.81   0.000     .0067965    .0101974
-       _cons |  -.0186069    .007908    -2.35   0.019    -.0341283   -.0030856
+      loggdp |  -.0003203   .0001334    -2.40   0.016     -.000582   -.0000586
+       _cons |   .0107961   .0011798     9.15   0.000     .0084817    .0131106
 -------------+----------------------------------------------------------------
-     sigma_u |  .00885815
-     sigma_e |  .00424631
-         rho |  .81314492   (fraction of variance due to u_i)
+     sigma_u |  .00340241
+     sigma_e |  .00139177
+         rho |  .85665866   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
-F test that all u_i=0: F(54, 855) = 55.88                    Prob > F = 0.0000
+F test that all u_i=0: F(44, 1381) = 116.21                  Prob > F = 0.0000
 
 . predict u, u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . gen `1'within = `1'-u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . 
 . lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
@@ -157,34 +157,34 @@ end of do-file
 . 
 . xtreg `1' `2', i(country) fe
 
-Fixed-effects (within) regression               Number of obs     =        911
-Group variable: country                         Number of groups  =         55
+Fixed-effects (within) regression               Number of obs     =      1,427
+Group variable: country                         Number of groups  =         45
 
 R-sq:                                           Obs per group:
-     within  = 0.0016                                         min =          1
-     between = 0.0315                                         avg =       16.6
-     overall = 0.0442                                         max =         20
+     within  = 0.0029                                         min =         20
+     between = 0.5805                                         avg =       31.7
+     overall = 0.4811                                         max =         37
 
-                                                F(1,855)          =       1.39
-corr(u_i, Xb)  = -0.2707                        Prob > F          =     0.2389
+                                                F(1,1381)         =       3.98
+corr(u_i, Xb)  = 0.6915                         Prob > F          =     0.0462
 
 ------------------------------------------------------------------------------
 Weighted_H~f |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
-      loggdp |   .0096116   .0081557     1.18   0.239    -.0063959    .0256192
-       _cons |  -.0436348   .0744431    -0.59   0.558    -.1897474    .1024779
+      loggdp |  -.0002796   .0001401    -2.00   0.046    -.0005544   -4.76e-06
+       _cons |   .0080102   .0012389     6.47   0.000     .0055798    .0104405
 -------------+----------------------------------------------------------------
-     sigma_u |  .14157892
-     sigma_e |  .03997335
-         rho |  .92616971   (fraction of variance due to u_i)
+     sigma_u |  .00636153
+     sigma_e |  .00146147
+         rho |  .94986749   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
-F test that all u_i=0: F(54, 855) = 195.22                   Prob > F = 0.0000
+F test that all u_i=0: F(44, 1381) = 285.54                  Prob > F = 0.0000
 
 . predict u, u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . gen `1'within = `1'-u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . 
 . lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
@@ -219,34 +219,34 @@ end of do-file
 . 
 . xtreg `1' `2', i(country) fe
 
-Fixed-effects (within) regression               Number of obs     =        911
-Group variable: country                         Number of groups  =         55
+Fixed-effects (within) regression               Number of obs     =      1,427
+Group variable: country                         Number of groups  =         45
 
 R-sq:                                           Obs per group:
-     within  = 0.1122                                         min =          1
-     between = 0.5677                                         avg =       16.6
-     overall = 0.5525                                         max =         20
+     within  = 0.4593                                         min =         20
+     between = 0.5989                                         avg =       31.7
+     overall = 0.5635                                         max =         37
 
-                                                F(1,855)          =     108.09
-corr(u_i, Xb)  = 0.3561                         Prob > F          =     0.0000
+                                                F(1,1381)         =    1172.96
+corr(u_i, Xb)  = -0.1916                        Prob > F          =     0.0000
 
 ------------------------------------------------------------------------------
 Sectoral_R~k |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
-      loggdp |   .0018246   .0001755    10.40   0.000     .0014801     .002169
-       _cons |  -.0102096   .0016019    -6.37   0.000    -.0133537   -.0070656
+      loggdp |  -.0004908   .0000143   -34.25   0.000    -.0005189   -.0004627
+       _cons |   .0080578   .0001267    63.58   0.000     .0078092    .0083064
 -------------+----------------------------------------------------------------
-     sigma_u |  .00201579
-     sigma_e |  .00086014
-         rho |  .84596888   (fraction of variance due to u_i)
+     sigma_u |  .00030817
+     sigma_e |  .00014951
+         rho |  .80948083   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
-F test that all u_i=0: F(54, 855) = 69.95                    Prob > F = 0.0000
+F test that all u_i=0: F(44, 1381) = 127.79                  Prob > F = 0.0000
 
 . predict u, u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . gen `1'within = `1'-u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . 
 . lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
@@ -281,34 +281,34 @@ end of do-file
 . 
 . xtreg `1' `2', i(country) fe
 
-Fixed-effects (within) regression               Number of obs     =        911
-Group variable: country                         Number of groups  =         55
+Fixed-effects (within) regression               Number of obs     =      1,427
+Group variable: country                         Number of groups  =         45
 
 R-sq:                                           Obs per group:
-     within  = 0.1062                                         min =          1
-     between = 0.0528                                         avg =       16.6
-     overall = 0.0529                                         max =         20
+     within  = 0.0364                                         min =         20
+     between = 0.0077                                         avg =       31.7
+     overall = 0.0028                                         max =         37
 
-                                                F(1,855)          =     101.61
-corr(u_i, Xb)  = 0.1145                         Prob > F          =     0.0000
+                                                F(1,1381)         =      52.21
+corr(u_i, Xb)  = -0.0766                        Prob > F          =     0.0000
 
 ------------------------------------------------------------------------------
 Sector_Cou~a |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
 -------------+----------------------------------------------------------------
-      loggdp |  -.0669912    .006646   -10.08   0.000    -.0800355   -.0539469
-       _cons |   .2407792   .0606625     3.97   0.000     .1217144     .359844
+      loggdp |   .0060261    .000834     7.23   0.000     .0043902    .0076621
+       _cons |  -.1114811   .0073751   -15.12   0.000    -.1259487   -.0970134
 -------------+----------------------------------------------------------------
-     sigma_u |  .44673221
-     sigma_e |  .03257362
-         rho |  .99471147   (fraction of variance due to u_i)
+     sigma_u |   .2199185
+     sigma_e |  .00870004
+         rho |  .99843743   (fraction of variance due to u_i)
 ------------------------------------------------------------------------------
-F test that all u_i=0: F(54, 855) = 3204.88                  Prob > F = 0.0000
+F test that all u_i=0: F(44, 1381) = 21079.88                Prob > F = 0.0000
 
 . predict u, u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . gen `1'within = `1'-u
-(7,329 missing values generated)
+(6,882 missing values generated)
 
 . 
 . lowess `1'within `2', bwidth(0.5) adjust msymbol(circle) msize(tiny) scheme(s
